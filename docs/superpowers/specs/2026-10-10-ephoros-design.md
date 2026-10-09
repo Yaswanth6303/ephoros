@@ -321,8 +321,9 @@ Port `LLMProvider` (domain) with adapters: `ClaudeProvider`, `OllamaProvider`, `
 2. Per-task env override, e.g. `LLM_TASK_COPILOT=ollama:<model>`.
 3. Global env `LLM_PROVIDER=claude|ollama`, with `CLAUDE_MODEL`, `OLLAMA_MODEL`.
 
-Tasks: `narrative`, `copilot`, `nl_search`, `rule_suggest`. Defaults when Claude is selected:
-Sonnet 5.5 for `narrative`/`copilot`, Haiku 5.5 for `nl_search`/`rule_suggest`.
+Tasks: `narrative`, `copilot`, `nl_search`, `rule_suggest`. Default when Claude is selected:
+`claude-opus-5-5` for every task with per-task effort; cheaper models (Sonnet 5.5, Haiku 5.5) are
+selectable per task in Admin settings. Full detail: `2026-10-10-ephoros-ai-layer-design.md`.
 
 **Fallback:** on error/timeout/budget exhaustion the default fallback is `TemplateProvider` only (no
 silent switch to another provider). `LLM_FALLBACK=ollama` opts in to provider fallback.
