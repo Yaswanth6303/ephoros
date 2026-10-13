@@ -416,6 +416,41 @@ RFC 9457 problem+json errors with `trace_id`; `structlog` JSON logs; OpenTelemet
   a Spartan package still imports them). Variant styling stays on `class-variance-authority`. VS Code
   Tailwind IntelliSense `classFunctions`: `["cn", "hlm", "cva"]`. Build-time compilation (`cn build`) is
   not used — the runtime package is already small and fast enough.
+- Micro-interactions: ported from [interior.dev](https://www.interior.dev/)
+  ([ddoemonn/interior](https://github.com/ddoemonn/interior), MIT). interior is React-only (React 19 +
+  Motion + Tailwind v4, installed via the shadcn CLI), so selected components are **re-implemented as
+  Angular standalone components/directives** in `libs/web/ui/src/interactions/`, animated with Motion's
+  framework-agnostic `animate()` API (`motion` package). Division of labour: **Spartan brain** owns
+  behaviour and accessibility; **interior** supplies the motion design. Where Spartan already has the
+  component (dialog, sheet/drawer, popover, dropdown, tabs, tooltip, accordion, command, pagination,
+  progress), Spartan stays and only interior's motion polish is borrowed. Every port honours
+  `prefers-reduced-motion`, carries an MIT attribution header, and is listed in `THIRD_PARTY_NOTICES.md`.
+  Components are ported when the feature that needs them is built, not up front.
+
+  | interior component | Used for in Ephoros |
+  |---|---|
+  | Copy Button | Event IDs, resource UIDs, principals, remediation commands |
+  | Hold to Confirm | Activate AI rule, mark incident false positive, reject rule (admin/destructive actions) |
+  | Loading Button | Regenerate narrative, run backtest, run evaluation |
+  | Segmented Control | Time range (15m/1h/24h/7d), lifecycle filter, theme toggle |
+  | Tooltip Group | Dense icon toolbars, MITRE badges, severity chips |
+  | Streaming Text | Copilot streamed answers |
+  | Typing Indicator | Copilot waiting / model thinking |
+  | Task Steps | Copilot tool activity; rule pipeline (draft → validate → backtest) |
+  | Value Flash | KPI tiles updating from SSE |
+  | New Items Pill | "3 new incidents" pill on live lists instead of the list jumping |
+  | Live Activity | Live detection feed on Overview |
+  | Skeleton Swap | Loading → content transitions |
+  | Inline Validation · Password Strength · Floating Label | Login/sign-up, rule editor, admin settings forms |
+  | Tag Input | Editable NL-search filter chips, rule MITRE tags |
+  | Expanding Search | Top-bar NL search entry |
+  | Tree View | Asset owner chain (Deployment → ReplicaSet → Pod) |
+  | Scroll Spy | Incident detail section nav (Summary · Timeline · Graph · Evidence · Narrative) |
+  | Sortable Table (motion only) | Row re-order animation on TanStack Table sorting |
+  | Progress Bar | Evaluation / training runs |
+
+  Not used (no fit): like burst, logo marquee, swipe deck, lightbox, snap carousel, OTP input, poll
+  results, presence avatars, wizard steps, reorder list, filter grid.
 - Server state: TanStack Query (Angular adapter). UI state: signals; filters synced to URL. No NgRx.
 - Tables: TanStack Table. Charts: ECharts via `ngx-echarts` (TanStack Charts is React-only).
 - `StreamService` consumes SSE and invalidates affected queries.
@@ -551,6 +586,7 @@ Each milestone ends with a working, demoable system and gets its own implementat
 | UI kit | Spartan/ui + Tailwind | Angular Material, PrimeNG, Taiga |
 | Charts | ECharts | TanStack Charts (React-only), Chart.js |
 | Tailwind class merging | `cn` | `clsx` + `tailwind-merge` (Spartan default) |
+| Micro-interactions | interior.dev designs ported to Angular + Motion `animate()` | Installing interior directly (React-only); Angular animations only |
 | Real-time transport | SSE | WebSockets |
 | DB | Postgres 17, no TimescaleDB | TimescaleDB, SQLite |
 | LLM | Pluggable, user-selected (Claude / Ollama), template fallback | Single hard-wired provider |
