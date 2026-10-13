@@ -409,6 +409,13 @@ RFC 9457 problem+json errors with `trace_id`; `structlog` JSON logs; OpenTelemet
 
 - Angular 22: standalone components, zoneless, signals, new control flow, lazy routes, Signal Forms.
 - Tailwind v4 + Spartan/ui (helm components owned in `libs/web/ui`); dark theme default, light toggle.
+- Class merging: the [`cn`](https://github.com/shadcn-ui/cn) package (drop-in, zero-dependency
+  replacement for `clsx` + `tailwind-merge`). After Spartan's CLI generates the helm utils, the generated
+  `hlm()` helper is replaced by `export { cn, cn as hlm } from 'cn'`, so every generated component keeps
+  working; `clsx` and `tailwind-merge` are removed from dependencies (aliased via pnpm `overrides` only if
+  a Spartan package still imports them). Variant styling stays on `class-variance-authority`. VS Code
+  Tailwind IntelliSense `classFunctions`: `["cn", "hlm", "cva"]`. Build-time compilation (`cn build`) is
+  not used — the runtime package is already small and fast enough.
 - Server state: TanStack Query (Angular adapter). UI state: signals; filters synced to URL. No NgRx.
 - Tables: TanStack Table. Charts: ECharts via `ngx-echarts` (TanStack Charts is React-only).
 - `StreamService` consumes SSE and invalidates affected queries.
@@ -543,6 +550,7 @@ Each milestone ends with a working, demoable system and gets its own implementat
 | Reverse proxy | Traefik | Caddy, nginx |
 | UI kit | Spartan/ui + Tailwind | Angular Material, PrimeNG, Taiga |
 | Charts | ECharts | TanStack Charts (React-only), Chart.js |
+| Tailwind class merging | `cn` | `clsx` + `tailwind-merge` (Spartan default) |
 | Real-time transport | SSE | WebSockets |
 | DB | Postgres 17, no TimescaleDB | TimescaleDB, SQLite |
 | LLM | Pluggable, user-selected (Claude / Ollama), template fallback | Single hard-wired provider |
