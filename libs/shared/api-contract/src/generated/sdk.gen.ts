@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { HealthzData, HealthzResponses, ReadyzData, ReadyzErrors, ReadyzResponses } from './types.gen';
+import type { HealthzData, HealthzResponses, MeData, MeResponses, ReadyzData, ReadyzErrors, ReadyzResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -22,6 +22,15 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
  * Healthz
  */
 export const healthz = <ThrowOnError extends boolean = false>(options?: Options<HealthzData, ThrowOnError>): RequestResult<HealthzResponses, unknown, ThrowOnError> => (options?.client ?? client).get<HealthzResponses, unknown, ThrowOnError>({ url: '/api/v1/healthz', ...options });
+
+/**
+ * Me
+ */
+export const me = <ThrowOnError extends boolean = false>(options?: Options<MeData, ThrowOnError>): RequestResult<MeResponses, unknown, ThrowOnError> => (options?.client ?? client).get<MeResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/me',
+    ...options
+});
 
 /**
  * Readyz

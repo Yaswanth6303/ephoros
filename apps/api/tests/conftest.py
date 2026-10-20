@@ -15,7 +15,12 @@ def anyio_backend() -> str:
 
 @pytest.fixture
 def settings() -> Settings:
-    return Settings(database_url="postgresql://unused", redis_url="redis://unused")
+    return Settings(
+        database_url="postgresql://unused",
+        redis_url="redis://unused",
+        jwks_url="http://unused/jwks",
+        jwt_issuer="https://issuer.test",
+    )
 
 
 @pytest.fixture

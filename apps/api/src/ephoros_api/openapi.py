@@ -9,7 +9,10 @@ from ephoros_api.config import Settings
 
 
 def export_openapi(path: Path) -> None:
-    app = create_app(Settings(database_url="unused", redis_url="unused"))
+    unused = "http://unused"
+    app = create_app(
+        Settings(database_url=unused, redis_url=unused, jwks_url=unused, jwt_issuer=unused)
+    )
     path.parent.mkdir(parents=True, exist_ok=True)
     # sorted + fixed indent keeps the file byte-stable for the CI drift check
     path.write_text(json.dumps(app.openapi(), indent=2, sort_keys=True) + "\n")

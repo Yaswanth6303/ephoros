@@ -9,6 +9,7 @@ dependencies = [
     "pydantic-settings==2.16.0",
     "asyncpg==0.32.0",
     "redis==8.1.0",
+    "pyjwt[crypto]==2.15.1",
 ]
 
 [build-system]

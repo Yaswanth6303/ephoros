@@ -11,7 +11,7 @@ pre-commit:
       stage_fixed: true
     eslint:
       glob: '*.{ts,mts}'
-      run: pnpm exec eslint --fix {staged_files}
+      run: pnpm exec eslint --fix --no-warn-ignored {staged_files}
       stage_fixed: true
     gitleaks:
       run: gitleaks git --staged --redact --no-banner

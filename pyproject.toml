@@ -28,3 +28,4 @@ plugins = ["pydantic.mypy"]
 
 [tool.pytest.ini_options]
 addopts = ["--strict-markers"]
+pythonpath = ["apps/api/tests"]

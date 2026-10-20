@@ -15,6 +15,28 @@ export type Health = {
 };
 
 /**
+ * Principal
+ */
+export type Principal = {
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Role
+     */
+    role: 'analyst' | 'admin';
+    /**
+     * Sub
+     */
+    sub: string;
+};
+
+/**
  * Problem
  */
 export type Problem = {
@@ -68,6 +90,22 @@ export type HealthzResponses = {
 };
 
 export type HealthzResponse = HealthzResponses[keyof HealthzResponses];
+
+export type MeData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/me';
+};
+
+export type MeResponses = {
+    /**
+     * Successful Response
+     */
+    200: Principal;
+};
+
+export type MeResponse = MeResponses[keyof MeResponses];
 
 export type ReadyzData = {
     body?: never;

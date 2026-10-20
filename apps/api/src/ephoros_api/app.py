@@ -2,11 +2,12 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from functools import partial
 
+import jwt
 from fastapi import FastAPI
 
 from ephoros_api.adapters.health import ping_postgres, ping_redis
 from ephoros_api.api.problems import install_problem_handlers
-from ephoros_api.api.v1 import health
+from ephoros_api.api.v1 import health, me
 from ephoros_api.config import Settings
 
 
@@ -28,7 +29,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         # operation IDs = function names, so the generated client exposes healthz(), readyz()
         generate_unique_id_function=lambda route: route.name,
     )
-    app.state.settings = settings or Settings()  # fields come from env
+    settings = settings or Settings()  # fields come from env
+    app.state.settings = settings
+    # keys cached; an unknown kid triggers one refetch (spec §16)
+    app.state.jwk_client = jwt.PyJWKClient(settings.jwks_url, cache_keys=True, lifespan=300)
     install_problem_handlers(app)
     app.include_router(health.router)
+    app.include_router(me.router)
     return app

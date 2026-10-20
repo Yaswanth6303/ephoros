@@ -8,3 +8,6 @@ class Settings(BaseSettings):
     database_url: str
     redis_url: str
     readiness_timeout_s: float = 2.0
+    jwks_url: str
+    jwt_issuer: str
+    jwt_audience: str = "ephoros-api"
