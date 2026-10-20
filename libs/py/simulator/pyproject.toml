@@ -1,0 +1,19 @@
+[project]
+name = "ephoros-simulator"
+version = "0.1.0"
+description = "Seeded, labelled cloud / Kubernetes / identity event generator and replayer"
+requires-python = ">=3.13"
+dependencies = ["ephoros-detection"]
+
+[project.scripts]
+ephoros-sim = "ephoros_sim.cli:main"
+
+[tool.uv.sources]
+ephoros-detection = { workspace = true }
+
+[build-system]
+requires = ["uv_build>=0.13.3,<0.14"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "ephoros_sim"

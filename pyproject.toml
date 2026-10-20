@@ -1,5 +1,5 @@
 [tool.uv.workspace]
-members = ["apps/api", "libs/py/detection-core"]
+members = ["apps/api", "libs/py/detection-core", "libs/py/simulator"]
 
 [dependency-groups]
 dev = [
@@ -20,11 +20,11 @@ extend-exclude = ["docs"]
 select = ["E", "F", "I", "B", "UP", "ASYNC"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["ephoros_api", "ephoros_detection"]
+known-first-party = ["ephoros_api", "ephoros_detection", "ephoros_sim"]
 
 [tool.mypy]
 strict = true
-files = ["apps/api/src", "libs/py/detection-core/src"]
+files = ["apps/api/src", "libs/py/detection-core/src", "libs/py/simulator/src"]
 plugins = ["pydantic.mypy"]
 
 [tool.pytest.ini_options]

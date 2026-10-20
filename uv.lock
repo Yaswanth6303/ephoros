@@ -10,6 +10,7 @@ resolution-markers = [
 members = [
     "ephoros-api",
     "ephoros-detection",
+    "ephoros-simulator",
 ]
 
 [manifest.dependency-groups]
@@ -379,6 +380,17 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [{ name = "pydantic", specifier = ">=2.14,<3" }]
+
+[[package]]
+name = "ephoros-simulator"
+version = "0.1.0"
+source = { editable = "libs/py/simulator" }
+dependencies = [
+    { name = "ephoros-detection" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "ephoros-detection", editable = "libs/py/detection-core" }]
 
 [[package]]
 name = "fastapi"
