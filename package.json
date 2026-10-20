@@ -15,6 +15,8 @@
     "@angular/cli": "~22.2.3",
     "@angular/compiler-cli": "~22.2.3",
     "@angular/language-service": "~22.2.3",
+    "@commitlint/cli": "21.2.4",
+    "@commitlint/config-conventional": "21.2.4",
     "@eslint/js": "^9.8.0",
     "@hey-api/openapi-ts": "0.99.0",
     "@nx/angular": "23.3.0",

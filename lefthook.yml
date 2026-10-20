@@ -1,0 +1,22 @@
+pre-commit:
+  parallel: true
+  commands:
+    ruff:
+      glob: '*.py'
+      run: uv run ruff check --fix {staged_files} && uv run ruff format {staged_files}
+      stage_fixed: true
+    prettier:
+      glob: '*.{ts,mts,html,css,json,md,yml,yaml}'
+      run: pnpm exec prettier --write --ignore-unknown {staged_files}
+      stage_fixed: true
+    eslint:
+      glob: '*.{ts,mts}'
+      run: pnpm exec eslint --fix {staged_files}
+      stage_fixed: true
+    gitleaks:
+      run: gitleaks git --staged --redact --no-banner
+
+commit-msg:
+  commands:
+    commitlint:
+      run: pnpm exec commitlint --edit {1}

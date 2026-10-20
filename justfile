@@ -8,6 +8,7 @@ setup:
     mise install
     pnpm install
     uv sync --all-packages
+    lefthook install
 
 # run the dev stack: infra in Docker, web + api with hot reload
 dev:
