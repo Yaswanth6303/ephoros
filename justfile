@@ -52,3 +52,11 @@ logs:
 # full stack + Playwright smoke tests
 e2e: up
     pnpm nx e2e web-e2e
+
+# apply database migrations (auth schema; Alembic joins in M3)
+migrate:
+    pnpm nx run auth:db-migrate
+
+# create the dev admin and analyst users from SEED_* env vars (idempotent)
+seed:
+    pnpm nx run auth:seed

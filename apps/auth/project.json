@@ -8,19 +8,49 @@
     "serve": {
       "executor": "nx:run-commands",
       "continuous": true,
-      "options": { "command": "node --watch src/main.ts", "cwd": "apps/auth" }
+      "options": {
+        "command": "node --watch src/main.ts",
+        "cwd": "apps/auth"
+      }
     },
     "test": {
       "executor": "nx:run-commands",
       "cache": true,
       "inputs": ["default", "^production"],
-      "options": { "command": "vitest run", "cwd": "apps/auth" }
+      "options": {
+        "command": "vitest run",
+        "cwd": "apps/auth"
+      }
     },
     "typecheck": {
       "executor": "nx:run-commands",
       "cache": true,
       "inputs": ["default", "^production"],
-      "options": { "command": "tsc -p tsconfig.json", "cwd": "apps/auth" }
+      "options": {
+        "command": "tsc -p tsconfig.json",
+        "cwd": "apps/auth"
+      }
+    },
+    "db-generate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "drizzle-kit generate",
+        "cwd": "apps/auth"
+      }
+    },
+    "db-migrate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "drizzle-kit migrate",
+        "cwd": "apps/auth"
+      }
+    },
+    "seed": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node src/seed.ts",
+        "cwd": "apps/auth"
+      }
     }
   }
 }
