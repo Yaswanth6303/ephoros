@@ -7,3 +7,4 @@ default:
 setup:
     mise install
     pnpm install
+    uv sync --all-packages

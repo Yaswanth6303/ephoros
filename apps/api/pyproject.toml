@@ -1,0 +1,16 @@
+[project]
+name = "ephoros-api"
+version = "0.1.0"
+description = "Ephoros API, worker and watcher processes"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi==0.150.0",
+    "uvicorn[standard]==0.54.0",
+    "pydantic-settings==2.16.0",
+    "asyncpg==0.32.0",
+    "redis==8.1.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.13.3,<0.14"]
+build-backend = "uv_build"
