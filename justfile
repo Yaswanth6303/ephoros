@@ -60,3 +60,7 @@ migrate:
 # create the dev admin and analyst users from SEED_* env vars (idempotent)
 seed:
     pnpm nx run auth:seed
+
+# generate a labelled dataset and replay it onto events.raw (speed 0 = as fast as possible, 1 = real time)
+simulate seed="7" speed="0":
+    uv run --package ephoros-simulator ephoros-sim generate --seed {{seed}} --replay --speed {{speed}}

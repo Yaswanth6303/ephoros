@@ -3,7 +3,7 @@ name = "ephoros-simulator"
 version = "0.1.0"
 description = "Seeded, labelled cloud / Kubernetes / identity event generator and replayer"
 requires-python = ">=3.13"
-dependencies = ["ephoros-detection"]
+dependencies = ["ephoros-detection", "redis==8.1.0", "asyncpg==0.32.0"]
 
 [project.scripts]
 ephoros-sim = "ephoros_sim.cli:main"

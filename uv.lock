@@ -536,11 +536,17 @@ name = "ephoros-simulator"
 version = "0.1.0"
 source = { editable = "libs/py/simulator" }
 dependencies = [
+    { name = "asyncpg" },
     { name = "ephoros-detection" },
+    { name = "redis" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "ephoros-detection", editable = "libs/py/detection-core" }]
+requires-dist = [
+    { name = "asyncpg", specifier = "==0.32.0" },
+    { name = "ephoros-detection", editable = "libs/py/detection-core" },
+    { name = "redis", specifier = "==8.1.0" },
+]
 
 [[package]]
 name = "fastapi"
