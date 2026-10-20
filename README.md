@@ -17,10 +17,12 @@ mise install            # pinned node, pnpm, python, uv, just, mkcert, …
 just setup              # pnpm + uv dependencies, git hooks
 cp .env.example .env
 just certs              # trusted local TLS cert (asks for your password once)
-just up                 # Traefik, web, api, Postgres, Redis
+just up                 # Traefik, web, api, auth, Postgres, Redis
+just migrate && just seed  # auth tables + dev admin/analyst users from SEED_* in .env
 ```
 
-Open <https://ephoros.localhost>. Run `just` to list every command (`just dev`, `just test`,
+Open <https://ephoros.localhost> and sign in with a `SEED_*` account from `.env`
+(public sign-up is disabled; admins create users). Run `just` to list every command (`just dev`, `just test`,
 `just e2e`, `just gen-client`, …).
 
 ## Docs
