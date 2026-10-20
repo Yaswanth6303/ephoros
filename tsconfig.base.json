@@ -25,7 +25,11 @@
       "@spartan-ng/helm/badge": ["./libs/web/ui/badge/src/index.ts"],
       "@spartan-ng/helm/field": ["./libs/web/ui/field/src/index.ts"],
       "@spartan-ng/helm/separator": ["./libs/web/ui/separator/src/index.ts"],
-      "@ephoros/web/core/auth": ["./libs/web/core/auth/src/index.ts"]
+      "@ephoros/web/core/auth": ["./libs/web/core/auth/src/index.ts"],
+      "@ephoros/web/feature-login": ["./libs/web/feature-login/src/index.ts"],
+      "@ephoros/web/ui/interactions": [
+        "./libs/web/ui/src/interactions/index.ts"
+      ]
     }
   },
   "exclude": ["node_modules", "tmp"]
