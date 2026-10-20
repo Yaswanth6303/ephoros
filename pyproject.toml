@@ -29,4 +29,4 @@ plugins = ["pydantic.mypy"]
 
 [tool.pytest.ini_options]
 addopts = ["--strict-markers"]
-pythonpath = ["apps/api/tests"]
+pythonpath = ["apps/api/tests", "libs/py/detection-core/tests"]
