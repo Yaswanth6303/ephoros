@@ -1,0 +1,16 @@
+import { Directive } from '@angular/core';
+import { classes } from '../../../utils/src/lib/hlm';
+
+@Directive({
+  selector: '[hlmCardFooter],hlm-card-footer',
+  exportAs: 'hlmCardFooter',
+  host: { 'data-slot': 'card-footer' },
+})
+export class HlmCardFooter {
+  constructor() {
+    classes(
+      () =>
+        'rounded-b-xl px-(--card-spacing) [.border-t]:pt-(--card-spacing) flex items-center',
+    );
+  }
+}

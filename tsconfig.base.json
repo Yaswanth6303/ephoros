@@ -15,7 +15,16 @@
     "skipDefaultLibCheck": true,
     "strict": false,
     "paths": {
-      "@ephoros/api-contract": ["./libs/shared/api-contract/src/index.ts"]
+      "@ephoros/api-contract": ["./libs/shared/api-contract/src/index.ts"],
+      "@spartan-ng/helm": ["./libs/web/ui/src/index.ts"],
+      "@spartan-ng/helm/button": ["./libs/web/ui/button/src/index.ts"],
+      "@spartan-ng/helm/utils": ["./libs/web/ui/utils/src/index.ts"],
+      "@spartan-ng/helm/input": ["./libs/web/ui/input/src/index.ts"],
+      "@spartan-ng/helm/label": ["./libs/web/ui/label/src/index.ts"],
+      "@spartan-ng/helm/card": ["./libs/web/ui/card/src/index.ts"],
+      "@spartan-ng/helm/badge": ["./libs/web/ui/badge/src/index.ts"],
+      "@spartan-ng/helm/field": ["./libs/web/ui/field/src/index.ts"],
+      "@spartan-ng/helm/separator": ["./libs/web/ui/separator/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

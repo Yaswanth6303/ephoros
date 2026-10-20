@@ -67,7 +67,8 @@
     "test": {
       "executor": "@angular/build:unit-test",
       "options": {
-        "watch": false
+        "watch": false,
+        "include": ["**/*.spec.ts", "../../../libs/web/**/*.spec.ts"]
       }
     },
     "serve-static": {
