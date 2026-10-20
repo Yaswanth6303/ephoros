@@ -1,0 +1,5 @@
+{
+  "name": "@ephoros/auth",
+  "private": true,
+  "type": "module"
+}

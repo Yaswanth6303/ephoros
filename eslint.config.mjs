@@ -5,7 +5,11 @@ export default [
   ...nx.configs['flat/typescript'],
   ...nx.configs['flat/javascript'],
   {
-    ignores: ['**/dist', '**/out-tsc', 'libs/shared/api-contract/src/generated'],
+    ignores: [
+      '**/dist',
+      '**/out-tsc',
+      'libs/shared/api-contract/src/generated',
+    ],
   },
   {
     files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'],
