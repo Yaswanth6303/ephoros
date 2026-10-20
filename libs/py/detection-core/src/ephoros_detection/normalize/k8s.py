@@ -89,10 +89,11 @@ def to_event(event_id: UUID, raw: dict[str, Any]) -> Event:
                 "user_agent": raw.get("userAgent"),
             },
             "resource": {
-                # subresource calls and some deletes carry no uid; fall back to a stable name key
-                "resource_uid": ref.get("uid") or f"k8s:{resource}:{namespace}:{ref['name']}",
+                # no uid on subresource calls and some deletes; no name on list/deletecollection
+                "resource_uid": ref.get("uid")
+                or f"k8s:{resource}:{namespace}:{ref.get('name', '*')}",
                 "kind": _KINDS.get(resource, resource),
-                "name": ref["name"],
+                "name": ref.get("name"),
                 "namespace": namespace,
                 "labels": meta.get("labels") or {},
                 "owner_ref": {k: owner[k] for k in ("kind", "name", "uid")} if owner else None,

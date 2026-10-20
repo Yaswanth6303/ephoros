@@ -13,7 +13,7 @@ from ephoros_sim.model import SimRecord
 START = datetime(2026, 1, 5, 8, 0, tzinfo=UTC)
 MALICIOUS = {"crypto_mining", "public_exposure", "identity_anomaly"}
 # update deliberately when the generator changes: it pins the evaluation dataset
-GOLDEN_SEED_7 = "fd0597974dbcad9d74deccc7a7654c5b22dbe6a6cadaf9be8b3c401f1e1996aa"
+GOLDEN_SEED_7 = "3077851a32cf8ffb1f2b34850a87f9769bc850c08cf18e54367bb1a14948ed05"
 
 
 def dump(records: list[SimRecord]) -> str:
@@ -96,3 +96,22 @@ def test_ambiguity_twins_exist() -> None:
     }
     assert len(deployer_ips) >= 2  # shared SA: CI automation and a stolen token
     assert any(r.label.scenario == "public_exposure" and not r.label.is_malicious for r in records)
+
+
+@pytest.mark.parametrize("seed", [1, 2, 7])
+def test_no_single_field_gives_the_label_away(seed: int) -> None:
+    """Every user agent and source /24 seen in malicious events also occurs in benign ones, so
+    detection (and M4's scores) must rely on behaviour, not on a dataset artifact."""
+    records = generate(seed, START)
+    events = [(normalize(r.event_id, r.source, r.raw), r.label.is_malicious) for r in records]
+
+    def values(malicious: bool, field: str) -> set[str]:
+        out = set()
+        for event, is_malicious in events:
+            value = getattr(event.actor, field)
+            if is_malicious == malicious and value:
+                out.add(value.rsplit(".", 1)[0] if field == "source_ip" else value)
+        return out
+
+    for field in ("user_agent", "source_ip"):
+        assert values(True, field) <= values(False, field), field

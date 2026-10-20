@@ -11,6 +11,12 @@ DLQ_STREAM = "events.dlq"
 GROUP = "workers"
 
 
+def connect(url: str) -> Redis:
+    """Strings in and out; invalid UTF-8 becomes U+FFFD so one bad record can't break a whole read
+    (the record then fails to parse and is dead-lettered)."""
+    return Redis.from_url(url, decode_responses=True, encoding_errors="replace")
+
+
 class RedisEventBus:
     """Consumer-group reader for events.raw. The client must use decode_responses=True."""
 

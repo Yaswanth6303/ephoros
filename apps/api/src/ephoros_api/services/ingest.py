@@ -23,20 +23,25 @@ class IngestResult:
     dead_lettered: int = 0
 
 
+def _check_storable(record: object) -> None:
+    """Reject what Postgres would refuse forever (it would stall the batch): NaN/Infinity in JSONB,
+    lone UTF-16 surrogates, NUL characters."""
+    text = json.dumps(record, allow_nan=False, ensure_ascii=False)
+    text.encode("utf-8")
+    if "\\u0000" in text:  # json.dumps always escapes control characters
+        raise NormalizationError("record contains NUL characters")
+
+
 def _parse(fields: dict[str, str]) -> Event:
     try:
-        event_id, source, raw = UUID(fields["event_id"]), fields["source"], fields["raw"]
-    except (KeyError, ValueError) as exc:
-        raise NormalizationError(f"bad envelope: {type(exc).__name__}: {exc}") from exc
-    if (
-        "\\u0000" in raw
-    ):  # Postgres rejects NUL in text/JSONB; storing it would fail the batch forever
-        raise NormalizationError("record contains NUL characters")
-    try:
-        record = json.loads(raw)
-    except json.JSONDecodeError as exc:
-        raise NormalizationError(f"raw is not JSON: {exc}") from exc
-    return normalize(event_id, source, record)
+        event_id, source = UUID(fields["event_id"]), fields["source"]
+        record = json.loads(fields["raw"])
+        _check_storable(record)
+        return normalize(event_id, source, record)
+    except NormalizationError:
+        raise
+    except Exception as exc:  # e.g. RecursionError on deeply nested JSON: still just a bad record
+        raise NormalizationError(f"{type(exc).__name__}: {exc}"[:500]) from exc
 
 
 class IngestService:
@@ -60,11 +65,41 @@ class IngestService:
                     | {"reason": str(exc)}
                 )
         # store first: if it raises, nothing is dead-lettered or acked and the batch is retried
-        stored = await self.store.add_many(valid)
+        stored, refused = await self._store(valid)
+        rejected += refused
         for fields in rejected:
             await self.bus.dead_letter(fields)
         await self.bus.ack([m.id for m in messages])
-        return IngestResult(stored, len(valid) - stored, len(rejected))
+        return IngestResult(stored, len(valid) - stored - len(refused), len(rejected))
+
+    async def _store(self, events: list[Event]) -> tuple[int, list[dict[str, str]]]:
+        """Store a batch; if it fails, retry row by row so one bad row cannot block the rest.
+        Every row failing means the database is the problem: re-raise and keep the batch pending."""
+        try:
+            return await self.store.add_many(events), []
+        except Exception:
+            if len(events) <= 1:
+                # shortcut: a lone permanently-bad row retries forever;
+                # cap redeliveries via the XPENDING delivery count if this is ever seen
+                raise
+        stored, refused, last_error = 0, [], None
+        for event in events:
+            try:
+                stored += await self.store.add_many([event])
+            except Exception as exc:
+                last_error = exc
+                reason = f"store rejected: {type(exc).__name__}: {exc}"[:500]
+                refused.append(
+                    {
+                        "event_id": str(event.event_id),
+                        "source": event.source.value,
+                        "raw": json.dumps(event.raw),
+                        "reason": reason,
+                    }
+                )
+        if last_error is not None and len(refused) == len(events):
+            raise last_error
+        return stored, refused
 
     async def run(self, stop: asyncio.Event) -> None:
         while not stop.is_set():

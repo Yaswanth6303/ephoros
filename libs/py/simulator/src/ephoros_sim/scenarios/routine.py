@@ -9,14 +9,18 @@ from ephoros_sim.scenarios import Clock, Instance
 from ephoros_sim.world import (
     ACCOUNTS,
     APP_NAMESPACES,
+    ATTACKER_COUNTRIES,
     DEPLOY_CONTROLLER,
     DEPLOYER_SA,
     RS_CONTROLLER,
+    SCRIPT_AGENTS,
+    Person,
     World,
     ci_ip,
     cluster_ip,
     role_arn,
     short_id,
+    vpn_ip,
 )
 
 
@@ -24,6 +28,9 @@ def instance(world: World, rng: random.Random, t0: datetime, k: int) -> Instance
     out = Instance("routine_lifecycle", False, "none")
     add, clock = out.records.append, Clock(t0)
     first, second = rng.sample(world.people, 2)
+    if k % 3 == 0:  # travelling / on a commercial VPN: an external IP and country, still benign
+        second = Person(second.email, rng.choice(ATTACKER_COUNTRIES), vpn_ip(rng, k // 3))
+    script_agent = SCRIPT_AGENTS[k % len(SCRIPT_AGENTS)]
     session = f"sess-{short_id(rng, 8)}"
     for event in ("login", "mfa", "token_issued"):
         add(
@@ -195,6 +202,7 @@ def instance(world: World, rng: random.Random, t0: datetime, k: int) -> Instance
                     arn=reader,
                     identity_type="AssumedRole",
                     ip=second.ip,
+                    user_agent=script_agent,
                     account=account,
                     region=region,
                     request={"roleArn": f"arn:aws:iam::{account}:role/read-only"},

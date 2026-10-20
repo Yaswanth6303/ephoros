@@ -12,13 +12,14 @@ from ephoros_sim.world import (
     ATTACKER_COUNTRIES,
     DEPLOYER_SA,
     IDPS,
+    SCRIPT_AGENTS,
     World,
     attacker_ip,
     role_arn,
     short_id,
 )
 
-_AGENT = "curl/8.5.0"
+_AGENTS = [*SCRIPT_AGENTS, "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_5)"]
 
 
 def instance(world: World, rng: random.Random, t0: datetime, k: int) -> Instance:
@@ -28,6 +29,7 @@ def instance(world: World, rng: random.Random, t0: datetime, k: int) -> Instance
     ip, country = attacker_ip(rng), rng.choice(ATTACKER_COUNTRIES)
     admin = f"arn:aws:iam::{account}:role/admin"
     clock = Clock(t0)
+    agent = rng.choice(_AGENTS)
 
     if (
         variant == 0
@@ -47,7 +49,7 @@ def instance(world: World, rng: random.Random, t0: datetime, k: int) -> Instance
             (
                 ts := clock.after(rng, 300, 900),
                 "identity",
-                r.identity(ts, "login", person.email, stolen, ip, country, user_agent=_AGENT),
+                r.identity(ts, "login", person.email, stolen, ip, country, user_agent=agent),
             )
         )
         add(
@@ -62,7 +64,7 @@ def instance(world: World, rng: random.Random, t0: datetime, k: int) -> Instance
                     ip,
                     country,
                     outcome="failure",
-                    user_agent=_AGENT,
+                    user_agent=agent,
                 ),
             )
         )
@@ -70,9 +72,7 @@ def instance(world: World, rng: random.Random, t0: datetime, k: int) -> Instance
             (
                 ts := clock.after(rng, 5, 60),
                 "identity",
-                r.identity(
-                    ts, "token_issued", person.email, stolen, ip, country, user_agent=_AGENT
-                ),
+                r.identity(ts, "token_issued", person.email, stolen, ip, country, user_agent=agent),
             )
         )
         arn = f"arn:aws:iam::{account}:user/{person.email.split('@')[0]}"
@@ -92,7 +92,7 @@ def instance(world: World, rng: random.Random, t0: datetime, k: int) -> Instance
                     ip,
                     country,
                     principal_type="service_account",
-                    user_agent=_AGENT,
+                    user_agent=agent,
                 ),
             )
         )
@@ -117,7 +117,7 @@ def instance(world: World, rng: random.Random, t0: datetime, k: int) -> Instance
                     country,
                     principal_type="federated",
                     federated_from=idp,
-                    user_agent=_AGENT,
+                    user_agent=agent,
                 ),
             )
         )
@@ -132,7 +132,7 @@ def instance(world: World, rng: random.Random, t0: datetime, k: int) -> Instance
         "ip": ip,
         "account": account,
         "region": region,
-        "user_agent": _AGENT,
+        "user_agent": agent,
     }
     ts = clock.after(rng, 10, 120)
     add((ts, "cloud_audit", r.cloud(ts, "AssumeRole", **common, request={"roleArn": admin})))

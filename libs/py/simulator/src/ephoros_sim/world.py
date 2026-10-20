@@ -71,8 +71,18 @@ def cluster_ip(rng: random.Random) -> str:
     return f"10.0.1.{rng.randint(2, 250)}"
 
 
+# hosting/VPN ranges: attackers use them, and so do employees on commercial VPNs (no free label)
+EXTERNAL_RANGES = ["185.220.101", "45.155.205", "103.75.190"]
+SCRIPT_AGENTS = ["python-requests/2.32", "curl/8.5.0", "aws-cli/2.17.0"]
+
+
 def attacker_ip(rng: random.Random) -> str:
-    return rng.choice(["185.220.101", "45.155.205", "103.75.190"]) + f".{rng.randint(2, 250)}"
+    return rng.choice(EXTERNAL_RANGES) + f".{rng.randint(2, 250)}"
+
+
+def vpn_ip(rng: random.Random, k: int) -> str:
+    """Benign egress through a VPN; cycles ranges by ordinal so every run covers all of them."""
+    return EXTERNAL_RANGES[k % len(EXTERNAL_RANGES)] + f".{rng.randint(2, 250)}"
 
 
 def role_arn(account: str, role: str, session: str) -> str:

@@ -38,6 +38,8 @@ def to_event(event_id: UUID, raw: dict[str, Any]) -> Event:
         "Role": req.get("roleArn"),
         "AccessKey": resp.get("accessKeyId") or req.get("userName"),
     }[kind]
+    if not uid and raw.get("errorCode"):
+        uid = f"failed:{action}:{event_id}"  # refused calls create nothing, but the attempt matters
     if not uid:
         raise NormalizationError(f"cloud_audit: {name} has no resource id")
     attributes: dict[str, Any] = {}

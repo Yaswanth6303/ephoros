@@ -140,3 +140,22 @@ def test_identity_federated_login() -> None:
 def test_invalid_records_raise_normalization_error(source: str, raw: Any) -> None:
     with pytest.raises(NormalizationError):
         normalize(uuid7(), source, raw)
+
+
+def test_k8s_list_without_a_name() -> None:
+    # real list / deletecollection audit records carry no objectRef.name
+    raw = k8s(
+        "list", objectRef={"resource": "secrets", "namespace": "payments"}, requestObject=None
+    )
+    e = run("k8s", raw)
+    assert (e.category, e.action, e.resource.kind) == ("api_activity", "list", "Secret")
+    assert e.resource.resource_uid == "k8s:secrets:payments:*"
+    assert e.resource.name is None
+
+
+def test_cloud_failed_launch_is_kept() -> None:
+    # a refused RunInstances has no instance id, but failed launches are a strong mining signal
+    raw = cloud(errorCode="InsufficientInstanceCapacity", responseElements=None)
+    e = run("cloud_audit", raw)
+    assert (e.action, e.outcome, e.resource.kind) == ("run_instances", "failure", "Instance")
+    assert e.resource.resource_uid == f"failed:run_instances:{e.event_id}"

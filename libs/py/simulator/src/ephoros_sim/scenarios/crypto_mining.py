@@ -17,13 +17,12 @@ from ephoros_sim.world import (
     short_id,
 )
 
-_AGENT = "python-requests/2.32"
-
 
 def instance(world: World, rng: random.Random, t0: datetime, k: int) -> Instance:
     gpu = k % 2 == 1 or rng.random() < 0.3
     out = Instance("crypto_mining", True, "critical" if gpu else "high")
     add, clock = out.records.append, Clock(t0)
+    agent = rng.choice(["python-requests/2.32", "kubectl/v1.31.0"])
     ip, ns = attacker_ip(rng), rng.choice([*APP_NAMESPACES, "ci"])
     ts = clock.after(rng, 0, 5)
     add(
@@ -38,7 +37,7 @@ def instance(world: World, rng: random.Random, t0: datetime, k: int) -> Instance
                 ip,
                 rng.choice(ATTACKER_COUNTRIES),
                 principal_type="service_account",
-                user_agent=_AGENT,
+                user_agent=agent,
             ),
         )
     )
@@ -67,7 +66,7 @@ def instance(world: World, rng: random.Random, t0: datetime, k: int) -> Instance
                 ip,
                 uid=uid,
                 body=body,
-                user_agent=_AGENT,
+                user_agent=agent,
             ),
         )
     )
@@ -87,7 +86,7 @@ def instance(world: World, rng: random.Random, t0: datetime, k: int) -> Instance
                     ip,
                     subresource="exec",
                     code=101,
-                    user_agent=_AGENT,
+                    user_agent=agent,
                 ),
             )
         )
@@ -106,7 +105,7 @@ def instance(world: World, rng: random.Random, t0: datetime, k: int) -> Instance
                 ip,
                 uid=uid,
                 code=200,
-                user_agent=_AGENT,
+                user_agent=agent,
             ),
         )
     )

@@ -7,7 +7,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 from ephoros_api.adapters.db.events import SqlEventStore
-from ephoros_api.adapters.redis_streams import DLQ_STREAM, GROUP, RAW_STREAM, RedisEventBus
+from ephoros_api.adapters.redis_streams import DLQ_STREAM, GROUP, RAW_STREAM, RedisEventBus, connect
 from ephoros_api.services.ingest import IngestService
 from ephoros_detection.ids import uuid7
 
@@ -63,3 +63,25 @@ async def test_stuck_pending_message_is_reclaimed(redis: Redis, engine: AsyncEng
 
     assert await count_events(engine) == 1
     assert (await redis.xpending(RAW_STREAM, GROUP))["pending"] == 0
+
+
+@pytest.mark.anyio
+async def test_non_utf8_bytes_do_not_break_reads(
+    redis_url: str, redis: Redis, engine: AsyncEngine
+) -> None:
+    # no decoding on this client, so the test can inject invalid UTF-8
+    raw_client = Redis.from_url(redis_url)
+    await raw_client.xadd(
+        RAW_STREAM, {"event_id": str(uuid7()), "source": "k8s", "raw": b"\xff\xfe{"}
+    )
+    await raw_client.aclose()
+    await redis.xadd(RAW_STREAM, envelope(1))
+
+    bus = RedisEventBus(connect(redis_url), "w")
+    await bus.ensure_group()
+    service = IngestService(SqlEventStore(engine), bus)
+    while batch := await bus.read(10, 100):
+        await service.handle(batch)
+
+    assert await count_events(engine) == 1
+    assert await redis.xlen(DLQ_STREAM) == 1

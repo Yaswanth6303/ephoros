@@ -113,3 +113,44 @@ async def test_redelivered_message_is_stored_once() -> None:
     first, second = await service.handle([msg]), await service.handle([msg])
     assert (first.stored, second.stored, second.duplicates) == (1, 0, 1)
     assert len(store.rows) == 1
+
+
+@pytest.mark.anyio
+@pytest.mark.parametrize(
+    "raw_text",
+    [
+        pytest.param("[" * 5000, id="deep-nesting-recursion"),
+        pytest.param(json.dumps(POD | {"userAgent": "\ud800"}), id="lone-surrogate"),
+        pytest.param(json.dumps(POD | {"latency": float("nan")}), id="nan"),
+        pytest.param(json.dumps(POD | {"latency": float("inf")}), id="infinity"),
+    ],
+)
+async def test_unstorable_records_go_to_dlq_without_blocking_the_batch(raw_text: str) -> None:
+    store, bus = FakeStore(), FakeBus()
+    poison = StreamMessage("1-1", {"event_id": str(uuid7()), "source": "k8s", "raw": raw_text})
+    result = await IngestService(store, bus).handle([poison, message(2)])
+    assert (result.stored, result.dead_lettered) == (1, 1)
+    assert bus.acked == ["1-1", "1-2"]
+
+
+class RejectingStore(FakeStore):
+    """Accepts everything except one event, like a row Postgres refuses permanently."""
+
+    def __init__(self, bad: UUID) -> None:
+        super().__init__()
+        self.bad = bad
+
+    async def add_many(self, events: Sequence[Event]) -> int:
+        if any(e.event_id == self.bad for e in events):
+            raise ValueError("invalid input for type jsonb")
+        return await super().add_many(events)
+
+
+@pytest.mark.anyio
+async def test_a_row_the_store_rejects_is_isolated_and_dead_lettered() -> None:
+    poison = message(1)
+    store, bus = RejectingStore(UUID(poison.fields["event_id"])), FakeBus()
+    result = await IngestService(store, bus).handle([poison, message(2), message(3)])
+    assert (result.stored, result.dead_lettered) == (2, 1)
+    assert "jsonb" in bus.dlq[0]["reason"]
+    assert bus.acked == ["1-1", "1-2", "1-3"]

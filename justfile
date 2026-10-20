@@ -61,6 +61,8 @@ migrate:
 seed:
     pnpm nx run auth:seed
 
-# generate a labelled dataset and replay it onto events.raw (speed 0 = as fast as possible, 1 = real time)
+# generate a labelled dataset starting now and replay it onto events.raw (speed 0 = as fast as
+# possible, 1 = real time). Each run is a new dataset; for a reproducible one pass a fixed start:
+# uv run ephoros-sim generate --seed 7 --start 2026-01-05T08:00:00Z --replay
 simulate seed="7" speed="0":
     uv run --package ephoros-simulator ephoros-sim generate --seed {{seed}} --replay --speed {{speed}}

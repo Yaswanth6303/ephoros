@@ -20,12 +20,14 @@ from ephoros_sim.world import (
 
 
 def instance(world: World, rng: random.Random, t0: datetime, k: int) -> Instance:
-    return (_ci if k % 2 == 0 else _autoscaler)(rng, t0)
+    return _ci(rng, t0, k // 2) if k % 2 == 0 else _autoscaler(rng, t0)
 
 
-def _ci(rng: random.Random, t0: datetime) -> Instance:
+def _ci(rng: random.Random, t0: datetime, k: int) -> Instance:
     out = Instance("legit_burst", False, "none")
     add, clock = out.records.append, Clock(t0)
+    # half the pipelines drive the API from scripts: the same client an attacker uses
+    agent = "python-requests/2.32" if k % 2 == 0 else "gitlab-runner/17.4"
     pipeline = f"p{rng.randint(1000, 9999)}"
     job, job_uid = f"build-{pipeline}", r.k8s_uid(rng)
     actor, ip = rng.choice([CI_SA, DEPLOYER_SA]), ci_ip(rng)
@@ -42,7 +44,7 @@ def _ci(rng: random.Random, t0: datetime) -> Instance:
                 ip,
                 "DE",
                 principal_type="service_account",
-                user_agent="gitlab-runner/17.4",
+                user_agent=agent,
             ),
         )
     )
@@ -62,7 +64,7 @@ def _ci(rng: random.Random, t0: datetime) -> Instance:
                 ip,
                 uid=job_uid,
                 body={"metadata": {"labels": labels}},
-                user_agent="gitlab-runner/17.4",
+                user_agent=agent,
             ),
         )
     )
