@@ -1,0 +1,53 @@
+name: ephoros
+
+services:
+  traefik:
+    image: traefik:v3.7.15
+    command: ['--configFile=/etc/traefik/traefik.yml']
+    ports: ['80:80', '443:443']
+    volumes:
+      - ./infra/traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./infra/traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro
+      - ./infra/traefik/certs:/certs:ro
+    depends_on:
+      api: { condition: service_healthy }
+      web: { condition: service_started }
+
+  web:
+    build: { context: ., dockerfile: apps/web/Dockerfile }
+
+  api:
+    build: { context: ., dockerfile: apps/api/Dockerfile }
+    environment:
+      APP_ENV: ${APP_ENV:-dev}
+      DATABASE_URL: postgresql://ephoros:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@postgres:5432/ephoros
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+
+  postgres:
+    image: postgres:17.11-alpine
+    environment:
+      POSTGRES_USER: ephoros
+      POSTGRES_DB: ephoros
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    ports: ['127.0.0.1:5432:5432']
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./infra/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ephoros -d ephoros']
+      interval: 5s
+      retries: 10
+
+  redis:
+    image: redis:7.4.11-alpine
+    ports: ['127.0.0.1:6379:6379']
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      retries: 10
+
+volumes:
+  pgdata:

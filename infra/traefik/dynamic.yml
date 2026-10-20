@@ -1,0 +1,28 @@
+http:
+  routers:
+    api:
+      rule: 'Host(`ephoros.localhost`) && PathPrefix(`/api/v1`)'
+      priority: 100
+      entryPoints: [websecure]
+      service: api
+      tls: {}
+    web:
+      rule: 'Host(`ephoros.localhost`)'
+      priority: 1
+      entryPoints: [websecure]
+      service: web
+      tls: {}
+  services:
+    api:
+      loadBalancer:
+        servers:
+          - url: 'http://api:8000'
+    web:
+      loadBalancer:
+        servers:
+          - url: 'http://web:8080'
+
+tls:
+  certificates:
+    - certFile: /certs/local.pem
+      keyFile: /certs/local-key.pem

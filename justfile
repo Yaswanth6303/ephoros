@@ -33,3 +33,21 @@ gen-client:
 check-contract: gen-client
     git diff --exit-code HEAD -- libs/shared/api-contract
     test -z "$(git ls-files --others --exclude-standard libs/shared/api-contract)"
+
+# create a locally trusted TLS certificate for https://ephoros.localhost
+certs:
+    mkdir -p infra/traefik/certs && mkcert -install && mkcert -cert-file infra/traefik/certs/local.pem -key-file infra/traefik/certs/local-key.pem ephoros.localhost localhost 127.0.0.1
+
+# build and start the full stack, waiting until healthy
+up:
+    docker compose up -d --build --wait
+
+down:
+    docker compose down
+
+logs:
+    docker compose logs -f
+
+# full stack + Playwright smoke tests
+e2e: up
+    pnpm nx e2e web-e2e
