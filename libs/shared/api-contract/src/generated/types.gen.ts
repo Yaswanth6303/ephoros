@@ -5,6 +5,93 @@ export type ClientOptions = {
 };
 
 /**
+ * Actor
+ */
+export type Actor = {
+    /**
+     * Principal Id
+     */
+    principal_id: string;
+    principal_type: PrincipalType;
+    /**
+     * Session Id
+     */
+    session_id?: string | null;
+    /**
+     * Source Ip
+     */
+    source_ip?: string | null;
+    /**
+     * User Agent
+     */
+    user_agent?: string | null;
+};
+
+/**
+ * Category
+ */
+export type Category = 'api_activity' | 'resource_lifecycle' | 'session' | 'rbac';
+
+/**
+ * EventOut
+ *
+ * An Event without `raw`: evidence stays server-side until incident detail.
+ */
+export type EventOut = {
+    /**
+     * Action
+     */
+    action: string;
+    actor: Actor;
+    /**
+     * Attributes
+     */
+    attributes: {
+        [key: string]: unknown;
+    };
+    category: Category;
+    /**
+     * Event Id
+     */
+    event_id: string;
+    /**
+     * Ingested At
+     */
+    ingested_at: string | null;
+    /**
+     * Observed At
+     */
+    observed_at: string;
+    outcome: Outcome;
+    resource: Resource;
+    source: Source;
+};
+
+/**
+ * EventPage
+ */
+export type EventPage = {
+    /**
+     * Items
+     */
+    items: Array<EventOut>;
+    /**
+     * Next Cursor
+     */
+    next_cursor: string | null;
+};
+
+/**
+ * HTTPValidationError
+ */
+export type HttpValidationError = {
+    /**
+     * Detail
+     */
+    detail?: Array<ValidationError>;
+};
+
+/**
  * Health
  */
 export type Health = {
@@ -13,6 +100,11 @@ export type Health = {
      */
     status: 'ok';
 };
+
+/**
+ * Outcome
+ */
+export type Outcome = 'success' | 'failure';
 
 /**
  * Principal
@@ -35,6 +127,11 @@ export type Principal = {
      */
     sub: string;
 };
+
+/**
+ * PrincipalType
+ */
+export type PrincipalType = 'user' | 'service_account' | 'role' | 'federated';
 
 /**
  * Problem
@@ -74,6 +171,115 @@ export type Readiness = {
      */
     status: 'ok';
 };
+
+/**
+ * Resource
+ */
+export type Resource = {
+    /**
+     * Account
+     */
+    account?: string | null;
+    /**
+     * Kind
+     */
+    kind: string;
+    /**
+     * Labels
+     */
+    labels?: {
+        [key: string]: string;
+    };
+    /**
+     * Name
+     */
+    name?: string | null;
+    /**
+     * Namespace
+     */
+    namespace?: string | null;
+    /**
+     * Owner Ref
+     */
+    owner_ref?: {
+        [key: string]: string;
+    } | null;
+    /**
+     * Region
+     */
+    region?: string | null;
+    /**
+     * Resource Uid
+     */
+    resource_uid: string;
+};
+
+/**
+ * Source
+ */
+export type Source = 'cloud_audit' | 'k8s' | 'identity';
+
+/**
+ * ValidationError
+ */
+export type ValidationError = {
+    /**
+     * Context
+     */
+    ctx?: {
+        [key: string]: unknown;
+    };
+    /**
+     * Input
+     */
+    input?: unknown;
+    /**
+     * Location
+     */
+    loc: Array<string | number>;
+    /**
+     * Message
+     */
+    msg: string;
+    /**
+     * Error Type
+     */
+    type: string;
+};
+
+export type ListEventsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Cursor
+         */
+        cursor?: string | null;
+    };
+    url: '/api/v1/events';
+};
+
+export type ListEventsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListEventsError = ListEventsErrors[keyof ListEventsErrors];
+
+export type ListEventsResponses = {
+    /**
+     * Successful Response
+     */
+    200: EventPage;
+};
+
+export type ListEventsResponse = ListEventsResponses[keyof ListEventsResponses];
 
 export type HealthzData = {
     body?: never;

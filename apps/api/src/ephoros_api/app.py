@@ -5,9 +5,11 @@ from functools import partial
 import jwt
 from fastapi import FastAPI
 
+from ephoros_api.adapters.db.engine import create_engine
+from ephoros_api.adapters.db.events import SqlEventStore
 from ephoros_api.adapters.health import ping_postgres, ping_redis
 from ephoros_api.api.problems import install_problem_handlers
-from ephoros_api.api.v1 import health, me
+from ephoros_api.api.v1 import events, health, me
 from ephoros_api.config import Settings
 
 
@@ -18,7 +20,10 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         "postgres": partial(ping_postgres, settings.database_url),
         "redis": partial(ping_redis, settings.redis_url),
     }
+    engine = create_engine(settings.database_url)
+    app.state.event_store = SqlEventStore(engine)
     yield
+    await engine.dispose()
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -42,4 +47,5 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     install_problem_handlers(app)
     app.include_router(health.router)
     app.include_router(me.router)
+    app.include_router(events.router)
     return app
