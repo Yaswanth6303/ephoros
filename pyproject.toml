@@ -9,6 +9,7 @@ dev = [
     "mypy==2.4.0",
     "asyncpg-stubs",
     "import-linter==2.15",
+    "testcontainers[postgres,redis]==4.15.0",
 ]
 
 [tool.ruff]
@@ -29,4 +30,5 @@ plugins = ["pydantic.mypy"]
 
 [tool.pytest.ini_options]
 addopts = ["--strict-markers"]
+markers = ["integration: needs Docker (Testcontainers)"]
 pythonpath = ["apps/api/tests", "libs/py/detection-core/tests"]

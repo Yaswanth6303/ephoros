@@ -10,6 +10,8 @@ lefthook = "2.2.2"
 
 [env]
 _.file = ".env"
+# Testcontainers' reaper mounts the socket path *inside* the Docker VM (Rancher Desktop, Colima); also correct on Linux
+TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE = "/var/run/docker.sock"
 
 [settings]
 # default flavor resolves to a free-threaded build that mise cannot install

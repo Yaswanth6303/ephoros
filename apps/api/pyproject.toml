@@ -10,8 +10,14 @@ dependencies = [
     "asyncpg==0.32.0",
     "redis==8.1.0",
     "pyjwt[crypto]==2.15.1",
+    "sqlalchemy[asyncio]==2.1.5",
+    "alembic==1.20.0",
+    "ephoros-detection",
 ]
 
 [build-system]
 requires = ["uv_build>=0.13.3,<0.14"]
 build-backend = "uv_build"
+
+[tool.uv.sources]
+ephoros-detection = { workspace = true }

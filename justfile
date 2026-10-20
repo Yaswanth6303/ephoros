@@ -53,9 +53,9 @@ logs:
 e2e: up migrate seed
     pnpm nx e2e web-e2e
 
-# apply database migrations (auth schema; Alembic joins in M3)
+# apply database migrations: core (Alembic) and auth (Drizzle)
 migrate:
-    pnpm nx run auth:db-migrate
+    uv run alembic -c apps/api/alembic.ini upgrade head && pnpm nx run auth:db-migrate
 
 # create the dev admin and analyst users from SEED_* env vars (idempotent)
 seed:
