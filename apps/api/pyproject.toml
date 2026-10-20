@@ -15,6 +15,9 @@ dependencies = [
     "ephoros-detection",
 ]
 
+[project.scripts]
+ephoros-worker = "ephoros_api.entrypoints.worker:main"
+
 [build-system]
 requires = ["uv_build>=0.13.3,<0.14"]
 build-backend = "uv_build"

@@ -38,6 +38,22 @@ services:
       postgres: { condition: service_healthy }
       redis: { condition: service_healthy }
 
+  worker:
+    build: { context: ., dockerfile: apps/api/Dockerfile }
+    command: ['ephoros-worker']
+    environment:
+      APP_ENV: ${APP_ENV:-dev}
+      DATABASE_URL: postgresql://ephoros:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@postgres:5432/ephoros
+      REDIS_URL: redis://redis:6379/0
+      JWKS_URL: http://auth:3000/api/auth/jwks # Settings is shared with the API
+      JWT_ISSUER: https://ephoros.localhost
+    healthcheck:
+      disable: true # the image's HTTP healthcheck is for the API process
+    restart: unless-stopped
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+
   postgres:
     image: postgres:17.11-alpine
     environment:

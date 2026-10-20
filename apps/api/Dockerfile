@@ -5,6 +5,7 @@ ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy UV_PYTHON_DOWNLOADS=never
 WORKDIR /app
 COPY pyproject.toml uv.lock ./
 COPY apps/api apps/api
+COPY libs/py libs/py
 RUN uv sync --frozen --no-dev --package ephoros-api --no-editable
 
 FROM python:3.13-slim

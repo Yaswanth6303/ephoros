@@ -12,7 +12,7 @@ setup:
 
 # run the dev stack: infra in Docker, web + api with hot reload
 dev:
-    docker compose up -d postgres redis && pnpm nx run-many -t serve -p web api
+    docker compose up -d postgres redis && pnpm nx run-many -t serve serve-worker -p web api auth
 
 test:
     pnpm nx run-many -t test
