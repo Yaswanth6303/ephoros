@@ -1,0 +1,40 @@
+{
+  "name": "detection-core",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/py/detection-core/src",
+  "tags": ["type:util", "scope:py"],
+  "namedInputs": {
+    "python": [
+      "{projectRoot}/**/*",
+      "{workspaceRoot}/pyproject.toml",
+      "{workspaceRoot}/uv.lock"
+    ]
+  },
+  "targets": {
+    "test": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["python"],
+      "options": {
+        "command": "uv run pytest libs/py/detection-core -q"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["python", "{workspaceRoot}/.importlinter"],
+      "options": {
+        "command": "uv run ruff check libs/py/detection-core && uv run ruff format --check libs/py/detection-core && uv run lint-imports"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["python"],
+      "options": {
+        "command": "uv run mypy"
+      }
+    }
+  }
+}

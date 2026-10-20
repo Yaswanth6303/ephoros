@@ -23,21 +23,25 @@
       "executor": "nx:run-commands",
       "cache": true,
       "inputs": ["python"],
-      "options": { "command": "uv run pytest apps/api/tests -q" }
+      "options": {
+        "command": "uv run pytest apps/api/tests -q"
+      }
     },
     "lint": {
       "executor": "nx:run-commands",
       "cache": true,
-      "inputs": ["python"],
+      "inputs": ["python", "{workspaceRoot}/.importlinter"],
       "options": {
-        "command": "uv run ruff check apps/api && uv run ruff format --check apps/api"
+        "command": "uv run ruff check apps/api && uv run ruff format --check apps/api && uv run lint-imports"
       }
     },
     "typecheck": {
       "executor": "nx:run-commands",
       "cache": true,
       "inputs": ["python"],
-      "options": { "command": "uv run mypy" }
+      "options": {
+        "command": "uv run mypy"
+      }
     },
     "openapi": {
       "executor": "nx:run-commands",

@@ -1,0 +1,35 @@
+[importlinter]
+root_packages =
+    ephoros_api
+    ephoros_detection
+include_external_packages = True
+
+[importlinter:contract:detection-core-is-framework-free]
+name = detection-core imports no web, DB or messaging framework (spec §4.3)
+type = forbidden
+source_modules = ephoros_detection
+forbidden_modules =
+    fastapi
+    sqlalchemy
+    redis
+    asyncpg
+    ephoros_api
+
+[importlinter:contract:api-layers]
+name = API layers: entrypoints > api > services > domain (spec §9.1)
+type = layers
+layers =
+    ephoros_api.entrypoints
+    ephoros_api.api
+    ephoros_api.services
+    ephoros_api.domain
+
+[importlinter:contract:domain-is-pure]
+name = domain imports no adapters or frameworks (spec §4.3)
+type = forbidden
+source_modules = ephoros_api.domain
+forbidden_modules =
+    ephoros_api.adapters
+    fastapi
+    sqlalchemy
+    redis

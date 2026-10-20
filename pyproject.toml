@@ -1,5 +1,5 @@
 [tool.uv.workspace]
-members = ["apps/api"]
+members = ["apps/api", "libs/py/detection-core"]
 
 [dependency-groups]
 dev = [
@@ -8,6 +8,7 @@ dev = [
     "ruff==0.17.1",
     "mypy==2.4.0",
     "asyncpg-stubs",
+    "import-linter==2.15",
 ]
 
 [tool.ruff]
@@ -19,11 +20,11 @@ extend-exclude = ["docs"]
 select = ["E", "F", "I", "B", "UP", "ASYNC"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["ephoros_api"]
+known-first-party = ["ephoros_api", "ephoros_detection"]
 
 [tool.mypy]
 strict = true
-files = ["apps/api/src"]
+files = ["apps/api/src", "libs/py/detection-core/src"]
 plugins = ["pydantic.mypy"]
 
 [tool.pytest.ini_options]
