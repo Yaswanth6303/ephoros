@@ -8,7 +8,9 @@ COPY apps/api apps/api
 RUN uv sync --frozen --no-dev --package ephoros-api --no-editable
 
 FROM python:3.13-slim
-RUN useradd --uid 10001 --no-create-home --shell /usr/sbin/nologin app
+# pip is unused at runtime and vendors packages with known CVEs
+RUN pip uninstall -y pip && rm -rf /usr/local/lib/python3.13/ensurepip \
+ && useradd --uid 10001 --no-create-home --shell /usr/sbin/nologin app
 COPY --from=build /app/.venv /app/.venv
 ENV PATH="/app/.venv/bin:$PATH" PYTHONUNBUFFERED=1
 USER 10001

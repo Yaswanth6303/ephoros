@@ -1,0 +1,2 @@
+# fake AWS key used as a hook-test example in the M1 plan, not a secret
+2d4979dccf09bf016f1282e1efbaaae7c7887ae0:docs/superpowers/plans/2026-10-20-m1-foundation.md:aws-access-token:486
