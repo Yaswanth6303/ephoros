@@ -7,3 +7,5 @@ pnpm-lock.yaml
 /node_modules
 
 .angular
+/libs/shared/api-contract/openapi.json
+/libs/shared/api-contract/src/generated

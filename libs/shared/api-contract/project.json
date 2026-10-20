@@ -1,0 +1,23 @@
+{
+  "name": "api-contract",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/shared/api-contract/src",
+  "projectType": "library",
+  "tags": ["type:contract", "scope:shared"],
+  "targets": {
+    "generate": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["api:openapi"],
+      "cache": true,
+      "inputs": [
+        "{projectRoot}/openapi.json",
+        "{projectRoot}/openapi-ts.config.ts"
+      ],
+      "outputs": ["{projectRoot}/src/generated"],
+      "options": {
+        "command": "openapi-ts",
+        "cwd": "libs/shared/api-contract"
+      }
+    }
+  }
+}

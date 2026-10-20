@@ -24,3 +24,12 @@ typecheck:
 
 fmt:
     uv run ruff format . && pnpm nx format:write
+
+# regenerate the TypeScript API client from FastAPI's OpenAPI document
+gen-client:
+    pnpm nx run api-contract:generate --skip-nx-cache
+
+# fail if the committed client differs from what the API generates (CI)
+check-contract: gen-client
+    git diff --exit-code HEAD -- libs/shared/api-contract
+    test -z "$(git ls-files --others --exclude-standard libs/shared/api-contract)"
