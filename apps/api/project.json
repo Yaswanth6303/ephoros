@@ -1,0 +1,52 @@
+{
+  "name": "api",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/api/src",
+  "tags": ["type:app", "scope:py"],
+  "namedInputs": {
+    "python": [
+      "{projectRoot}/**/*",
+      "{workspaceRoot}/pyproject.toml",
+      "{workspaceRoot}/uv.lock"
+    ]
+  },
+  "targets": {
+    "serve": {
+      "executor": "nx:run-commands",
+      "continuous": true,
+      "options": {
+        "command": "uv run uvicorn ephoros_api.entrypoints.api:app --reload --port 8000"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["python"],
+      "options": { "command": "uv run pytest apps/api/tests -q" }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["python"],
+      "options": {
+        "command": "uv run ruff check apps/api && uv run ruff format --check apps/api"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["python"],
+      "options": { "command": "uv run mypy" }
+    },
+    "openapi": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["python"],
+      "outputs": ["{workspaceRoot}/libs/shared/api-contract/openapi.json"],
+      "options": {
+        "command": "uv run python -m ephoros_api.openapi libs/shared/api-contract/openapi.json"
+      }
+    }
+  }
+}
