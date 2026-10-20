@@ -1,5 +1,12 @@
 http:
   routers:
+    auth:
+      rule: 'Host(`ephoros.localhost`) && PathPrefix(`/api/auth`)'
+      priority: 100
+      entryPoints: [websecure]
+      middlewares: [auth-ratelimit]
+      service: auth
+      tls: {}
     api:
       rule: 'Host(`ephoros.localhost`) && PathPrefix(`/api/v1`)'
       priority: 100
@@ -12,7 +19,17 @@ http:
       entryPoints: [websecure]
       service: web
       tls: {}
+  middlewares:
+    # per client IP; slows down password guessing (spec §9.3)
+    auth-ratelimit:
+      rateLimit:
+        average: 10
+        burst: 20
   services:
+    auth:
+      loadBalancer:
+        servers:
+          - url: 'http://auth:3000'
     api:
       loadBalancer:
         servers:
@@ -24,5 +41,5 @@ http:
 
 tls:
   certificates:
-    - certFile: /certs/local.pem
-      keyFile: /certs/local-key.pem
+    - certFile: /etc/traefik/certs/local.pem
+      keyFile: /etc/traefik/certs/local-key.pem

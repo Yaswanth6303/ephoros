@@ -50,7 +50,7 @@ logs:
     docker compose logs -f
 
 # full stack + Playwright smoke tests
-e2e: up
+e2e: up migrate seed
     pnpm nx e2e web-e2e
 
 # apply database migrations (auth schema; Alembic joins in M3)

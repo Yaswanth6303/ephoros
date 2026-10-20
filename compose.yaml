@@ -6,20 +6,32 @@ services:
     command: ['--configFile=/etc/traefik/traefik.yml']
     ports: ['80:80', '443:443']
     volumes:
-      - ./infra/traefik/traefik.yml:/etc/traefik/traefik.yml:ro
-      - ./infra/traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro
-      - ./infra/traefik/certs:/certs:ro
+      # whole directory, not single files: editors replace files (new inode), which a file mount never sees
+      - ./infra/traefik:/etc/traefik:ro
     depends_on:
       api: { condition: service_healthy }
+      auth: { condition: service_healthy }
       web: { condition: service_started }
 
   web:
     build: { context: ., dockerfile: apps/web/Dockerfile }
 
+  auth:
+    build: { context: ., dockerfile: apps/auth/Dockerfile }
+    environment:
+      DATABASE_URL: postgresql://ephoros:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@postgres:5432/ephoros
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?set BETTER_AUTH_SECRET in .env}
+      BETTER_AUTH_URL: https://ephoros.localhost
+    depends_on:
+      postgres: { condition: service_healthy }
+
   api:
     build: { context: ., dockerfile: apps/api/Dockerfile }
     environment:
       APP_ENV: ${APP_ENV:-dev}
+      JWKS_URL: http://auth:3000/api/auth/jwks
+      JWT_ISSUER: https://ephoros.localhost
+      JWT_AUDIENCE: ephoros-api
       DATABASE_URL: postgresql://ephoros:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@postgres:5432/ephoros
       REDIS_URL: redis://redis:6379/0
     depends_on:
