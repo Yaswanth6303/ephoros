@@ -6,3 +6,4 @@ default:
 # install pinned tools and all dependencies
 setup:
     mise install
+    pnpm install
