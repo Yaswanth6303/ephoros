@@ -1,0 +1,25 @@
+# env & secrets
+.env
+infra/traefik/certs/
+
+# node / nx
+node_modules/
+dist/
+.nx/
+coverage/
+test-results/
+playwright-report/
+
+# python
+.venv/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# local tooling
+.superpowers/
+.claude-flow/
+.swarm/
+ruvector.db
+.DS_Store
