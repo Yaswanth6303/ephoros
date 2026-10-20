@@ -32,7 +32,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or Settings()  # fields come from env
     app.state.settings = settings
     # keys cached; an unknown kid triggers one refetch (spec §16)
-    app.state.jwk_client = jwt.PyJWKClient(settings.jwks_url, cache_keys=True, lifespan=300)
+    # shortcut: cached keys are never evicted, add eviction when Better Auth key rotation is enabled
+    app.state.jwk_client = jwt.PyJWKClient(
+        settings.jwks_url,
+        cache_keys=True,
+        lifespan=300,
+        timeout=settings.readiness_timeout_s,  # default 30 s would stall threads under one lock
+    )
     install_problem_handlers(app)
     app.include_router(health.router)
     app.include_router(me.router)

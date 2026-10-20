@@ -4,6 +4,9 @@ import { jwtExp } from './jwt';
 
 const REFRESH_BEFORE_MS = 60_000;
 
+/** The auth service says there is no valid session (401) — the user must sign in again. */
+export class SessionExpiredError extends Error {}
+
 @Injectable({ providedIn: 'root' })
 export class AuthStore {
   private readonly client = inject(AUTH_CLIENT);
@@ -13,6 +16,7 @@ export class AuthStore {
   );
   private token: string | null = null;
   private refreshing: Promise<string> | null = null;
+  private generation = 0; // bumped by expire(): refreshes started before it are discarded
 
   readonly user = this._user.asReadonly();
   readonly status = this._status.asReadonly();
@@ -43,8 +47,15 @@ export class AuthStore {
 
   /** Clears local auth state (sign-out, or the API answered 401). */
   expire(): void {
+    this.generation++;
     this.token = null;
+    this.refreshing = null;
     this.setUser(null);
+  }
+
+  /** Drops the cached JWT so the next accessToken() fetches a fresh one (e.g. after an API 401). */
+  invalidateToken(): void {
+    this.token = null;
   }
 
   /** A short-lived API JWT, refreshed shortly before it expires; concurrent callers share one fetch. */
@@ -55,14 +66,25 @@ export class AuthStore {
     ) {
       return Promise.resolve(this.token);
     }
+    const generation = this.generation;
     this.refreshing ??= this.client
       .token()
-      .then(({ data }) => {
-        if (!data) throw new Error('No active session');
+      .then(({ data, error }) => {
+        if (!data) {
+          throw error?.status === 401
+            ? new SessionExpiredError('Session expired')
+            : new Error(
+                `Auth service unavailable (${error?.status ?? 'network'})`,
+              );
+        }
+        if (generation !== this.generation)
+          throw new SessionExpiredError('Signed out');
         this.token = data.token;
         return data.token;
       })
-      .finally(() => (this.refreshing = null));
+      .finally(() => {
+        if (generation === this.generation) this.refreshing = null;
+      });
     return this.refreshing;
   }
 

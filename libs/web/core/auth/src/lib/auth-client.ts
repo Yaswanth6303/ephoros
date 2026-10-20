@@ -19,7 +19,10 @@ export interface AuthApi {
     }): Promise<{ error: { status: number } | null }>;
   };
   signOut(): Promise<unknown>;
-  token(): Promise<{ data: { token: string } | null }>;
+  token(): Promise<{
+    data: { token: string } | null;
+    error?: { status: number } | null;
+  }>;
 }
 
 export const AUTH_CLIENT = new InjectionToken<AuthApi>('AUTH_CLIENT', {

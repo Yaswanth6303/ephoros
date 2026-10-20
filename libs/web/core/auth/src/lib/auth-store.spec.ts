@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { AUTH_CLIENT } from './auth-client';
-import { AuthStore } from './auth-store';
+import { AuthStore, SessionExpiredError } from './auth-store';
 import { analyst, fakeAuthApi } from './testing';
 
 describe('AuthStore', () => {
@@ -68,5 +68,37 @@ describe('AuthStore', () => {
     expect(store.status()).toBe('anonymous');
     await store.accessToken().catch(() => undefined);
     expect(api.token).toHaveBeenCalledTimes(2);
+  });
+
+  it('a non-401 token failure rejects without signing the user out', async () => {
+    await store.signIn(analyst.email, 'right');
+    api.token.mockResolvedValueOnce({ data: null, error: { status: 503 } });
+    await expect(store.accessToken()).rejects.not.toBeInstanceOf(
+      SessionExpiredError,
+    );
+    expect(store.status()).toBe('authenticated');
+  });
+
+  it('a 401 from the auth service rejects with SessionExpiredError', async () => {
+    api.user = null;
+    await expect(store.accessToken()).rejects.toBeInstanceOf(
+      SessionExpiredError,
+    );
+  });
+
+  it('signOut during a refresh does not keep the old token', async () => {
+    let release!: () => void;
+    api.token.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          release = () => resolve({ data: { token: 'stale' }, error: null });
+        }),
+    );
+    const inFlight = store.accessToken();
+    await store.signOut();
+    release();
+    await inFlight.catch(() => undefined);
+    api.user = analyst;
+    expect(await store.accessToken()).not.toBe('stale');
   });
 });

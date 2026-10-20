@@ -27,10 +27,17 @@ export function fakeAuthApi(user: SessionUser | null = analyst) {
       ),
     },
     signOut: vi.fn(async () => ({})),
-    token: vi.fn(async () =>
-      api.user
-        ? { data: { token: fakeJwt(nowSeconds() + api.tokenTtl) } }
-        : { data: null },
+    token: vi.fn(
+      async (): Promise<{
+        data: { token: string } | null;
+        error: { status: number } | null;
+      }> =>
+        api.user
+          ? {
+              data: { token: fakeJwt(nowSeconds() + api.tokenTtl) },
+              error: null,
+            }
+          : { data: null, error: { status: 401 } },
     ),
   };
   return api satisfies AuthApi;

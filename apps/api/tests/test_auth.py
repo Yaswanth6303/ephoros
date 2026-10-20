@@ -1,3 +1,4 @@
+import socket
 import time
 from typing import Annotated
 
@@ -6,10 +7,12 @@ import pytest
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 from fastapi import Depends, FastAPI
-from httpx import AsyncClient
+from httpx import ASGITransport, AsyncClient
 from jwt_factory import FakeJWKClient, make_token
 
 from ephoros_api.api.auth import Principal, get_jwk_client, require_role
+from ephoros_api.app import create_app
+from ephoros_api.config import Settings
 
 KEY = Ed25519PrivateKey.generate()
 
@@ -109,3 +112,18 @@ async def test_analyst_on_admin_route_is_403(client: AsyncClient, admin_route: N
 async def test_admin_on_admin_route_is_200(client: AsyncClient, admin_route: None) -> None:
     r = await client.get("/api/v1/_admin", headers=bearer(make_token(KEY, role="admin")))
     assert r.status_code == 200
+
+
+@pytest.mark.anyio
+async def test_hanging_jwks_endpoint_fails_fast(settings: Settings) -> None:
+    # accepts TCP connections but never answers, like a paused auth container
+    with socket.socket() as server:
+        server.bind(("127.0.0.1", 0))
+        server.listen()
+        port = server.getsockname()[1]
+        app = create_app(settings.model_copy(update={"jwks_url": f"http://127.0.0.1:{port}/jwks"}))
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
+            start = time.monotonic()
+            r = await c.get("/api/v1/me", headers=bearer(make_token(KEY)))
+        assert r.status_code == 401
+        assert time.monotonic() - start < 3.5
