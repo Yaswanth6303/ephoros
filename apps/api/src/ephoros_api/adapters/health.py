@@ -7,7 +7,8 @@ async def ping_postgres(dsn: str) -> None:
     try:
         await conn.execute("SELECT 1")
     finally:
-        await conn.close()
+        # terminate, not close: close() waits forever on a stalled server and would hang /readyz
+        conn.terminate()
 
 
 async def ping_redis(url: str) -> None:

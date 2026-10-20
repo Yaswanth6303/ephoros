@@ -1,5 +1,6 @@
 """RFC 9457 problem details for every error response."""
 
+from collections.abc import Mapping
 from http import HTTPStatus
 from typing import Any
 
@@ -20,18 +21,24 @@ class Problem(BaseModel):
     detail: str | None = None
 
 
-def problem_response(status: int, detail: str | None = None, **extra: Any) -> JSONResponse:
+def problem_response(
+    status: int,
+    detail: str | None = None,
+    headers: Mapping[str, str] | None = None,
+    **extra: Any,
+) -> JSONResponse:
     problem = Problem(title=HTTPStatus(status).phrase, status=status, detail=detail, **extra)
     return JSONResponse(
         jsonable_encoder(problem),
         status_code=status,
+        headers=headers,
         media_type="application/problem+json",
     )
 
 
 async def _http_error(_: Request, exc: Exception) -> JSONResponse:
     assert isinstance(exc, StarletteHTTPException)
-    return problem_response(exc.status_code, str(exc.detail))
+    return problem_response(exc.status_code, str(exc.detail), exc.headers)
 
 
 async def _validation_error(_: Request, exc: Exception) -> JSONResponse:

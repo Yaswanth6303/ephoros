@@ -23,3 +23,11 @@ async def test_validation_error_is_problem_json(app: FastAPI, client: AsyncClien
     body = r.json()
     assert body["status"] == 422
     assert body["errors"][0]["loc"] == ["query", "n"]
+
+
+@pytest.mark.anyio
+async def test_error_headers_survive(client: AsyncClient) -> None:
+    r = await client.post("/api/v1/healthz")
+    assert r.status_code == 405
+    assert r.headers["content-type"] == "application/problem+json"
+    assert r.headers["allow"] == "GET"
