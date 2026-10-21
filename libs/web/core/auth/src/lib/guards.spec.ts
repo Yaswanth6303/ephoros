@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router, UrlSegment, UrlTree } from '@angular/router';
 import { AUTH_CLIENT } from './auth-client';
 import { authGuard, roleGuard } from './guards';
-import { fakeAuthApi } from './testing';
+import { analyst, fakeAuthApi } from './testing';
 
 const segments = [new UrlSegment('incidents', {})];
 
@@ -39,5 +39,10 @@ describe('guards', () => {
     await run(authGuard);
     const result = await run(roleGuard('admin'));
     expect(result).toBeInstanceOf(UrlTree);
+  });
+
+  it('roleGuard works on its own: guards in one array run concurrently', async () => {
+    setup({ ...analyst, role: 'admin' });
+    expect(await run(roleGuard('admin'))).toBe(true);
   });
 });

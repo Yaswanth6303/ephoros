@@ -9,7 +9,7 @@ import {
 } from '@angular/forms/signals';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthStore } from '@ephoros/web/core/auth';
-import { EphInlineError, EphLoadingButton } from '@ephoros/web/ui/interactions';
+import { InlineError, LoadingButton } from '@ephoros/web/ui/interactions';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmFieldImports } from '@spartan-ng/helm/field';
@@ -26,8 +26,8 @@ export function safeReturnUrl(raw: string | null): string {
   selector: 'eph-login',
   imports: [
     FormField,
-    EphInlineError,
-    EphLoadingButton,
+    InlineError,
+    LoadingButton,
     HlmButtonImports,
     HlmCardImports,
     HlmFieldImports,

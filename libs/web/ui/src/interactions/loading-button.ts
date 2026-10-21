@@ -2,28 +2,20 @@
  * Motion design ported from interior "Loading Button" (https://github.com/ddoemonn/interior).
  * MIT License, Copyright (c) ddoemonn. See THIRD_PARTY_NOTICES.md.
  */
-import {
-  Component,
-  effect,
-  type ElementRef,
-  input,
-  viewChild,
-} from '@angular/core';
-import { animate } from 'motion';
-import { motionAllowed } from './motion';
+import { Component, input } from '@angular/core';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector -- enhances the native <button>, like hlmBtn
   selector: 'button[ephLoadingButton]',
   host: {
-    '[disabled]': 'loading() || disabled()',
+    '[disabled]': 'loading()',
     '[attr.aria-busy]': 'loading()',
   },
   template: `
     <span class="inline-flex items-center gap-2">
       @if (loading()) {
         <svg
-          #spinner
+          animate.enter="motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-50 duration-200"
           class="size-4 animate-spin"
           viewBox="0 0 24 24"
           fill="none"
@@ -49,16 +41,6 @@ import { motionAllowed } from './motion';
     </span>
   `,
 })
-export class EphLoadingButton {
+export class LoadingButton {
   readonly loading = input(false);
-  readonly disabled = input(false);
-  private readonly spinner = viewChild<ElementRef<SVGElement>>('spinner');
-
-  constructor() {
-    effect(() => {
-      const el = this.spinner()?.nativeElement;
-      if (el && motionAllowed())
-        animate(el, { opacity: [0, 1], scale: [0.6, 1] }, { duration: 0.18 });
-    });
-  }
 }

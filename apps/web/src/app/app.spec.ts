@@ -25,7 +25,6 @@ describe('App', () => {
     });
     // no whenStable here: it would wait on the pending /api/v1/me request the tests answer
     const fixture = TestBed.createComponent(App);
-    fixture.detectChanges();
     return { fixture, el: fixture.nativeElement as HTMLElement };
   }
 

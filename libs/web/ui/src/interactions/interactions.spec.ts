@@ -1,9 +1,9 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { EphInlineError, EphLoadingButton } from './index';
+import { InlineError, LoadingButton } from './index';
 
 @Component({
-  imports: [EphLoadingButton, EphInlineError],
+  imports: [LoadingButton, InlineError],
   template: `
     <button ephLoadingButton [loading]="loading()">Sign in</button>
     <eph-inline-error [message]="message()" />

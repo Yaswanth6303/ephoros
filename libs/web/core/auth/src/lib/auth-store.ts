@@ -1,4 +1,4 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { inject, Service, signal } from '@angular/core';
 import { AUTH_CLIENT, type SessionUser } from './auth-client';
 import { jwtExp } from './jwt';
 
@@ -7,7 +7,7 @@ const REFRESH_BEFORE_MS = 60_000;
 /** The auth service says there is no valid session (401) — the user must sign in again. */
 export class SessionExpiredError extends Error {}
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class AuthStore {
   private readonly client = inject(AUTH_CLIENT);
   private readonly _user = signal<SessionUser | null>(null);

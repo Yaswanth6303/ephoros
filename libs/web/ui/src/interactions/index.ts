@@ -1,2 +1,2 @@
-export { EphInlineError } from './inline-error';
-export { EphLoadingButton } from './loading-button';
+export { InlineError } from './inline-error';
+export { LoadingButton } from './loading-button';

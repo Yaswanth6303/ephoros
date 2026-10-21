@@ -11,7 +11,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AUTH_CLIENT } from './auth-client';
-import { authInterceptor } from './auth.interceptor';
+import { authInterceptor } from './auth-interceptor';
 import { AuthStore } from './auth-store';
 import { fakeAuthApi } from './testing';
 
