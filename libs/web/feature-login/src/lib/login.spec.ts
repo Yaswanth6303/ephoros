@@ -41,6 +41,18 @@ describe('Login', () => {
     expect(signIn).not.toHaveBeenCalled();
   });
 
+  it('marks invalid fields for assistive technology (WCAG AA)', async () => {
+    const { el, type, submit } = await render();
+    type('email', 'not-an-email');
+    await submit();
+    const input = el.querySelector('#email')!;
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+    const error = el.querySelector(
+      `#${input.getAttribute('aria-describedby')}`,
+    );
+    expect(error?.textContent).toContain('Enter a valid email');
+  });
+
   it('signs in and navigates to the returnUrl', async () => {
     const { type, submit, navigate } = await render('/incidents');
     type('email', 'ana@ephoros.test');

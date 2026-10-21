@@ -1,4 +1,4 @@
-import { InjectionToken } from '@angular/core';
+import { DOCUMENT, inject, InjectionToken } from '@angular/core';
 import { createAuthClient } from 'better-auth/client';
 import { jwtClient } from 'better-auth/client/plugins';
 
@@ -28,7 +28,7 @@ export interface AuthApi {
 export const AUTH_CLIENT = new InjectionToken<AuthApi>('AUTH_CLIENT', {
   factory: () =>
     createAuthClient({
-      baseURL: location.origin,
+      baseURL: inject(DOCUMENT).location.origin,
       plugins: [jwtClient()],
     }) as unknown as AuthApi,
 });
