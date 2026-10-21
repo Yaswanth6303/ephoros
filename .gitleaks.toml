@@ -1,0 +1,6 @@
+[extend]
+useDefault = true
+
+# fake key in the M1 plan that demonstrates the pre-commit hook rejecting secrets
+[[allowlists]]
+regexes = ['''AKIAABCDEFGHIJKLMNOP''']
