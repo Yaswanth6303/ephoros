@@ -24,6 +24,8 @@ __pycache__/
 ruvector.db
 .DS_Store
 /.nx/migrate-runs
+.claude
+.agents
 
 .angular
 
