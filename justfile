@@ -1,5 +1,8 @@
 # Ephoros command entrypoint. Each recipe delegates to one tool; no logic here.
 
+# recipes see .env even where mise loaded the environment before .env existed (CI)
+set dotenv-load
+
 default:
     @just --list
 
