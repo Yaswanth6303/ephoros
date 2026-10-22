@@ -47,8 +47,13 @@ services:
       REDIS_URL: redis://redis:6379/0
       JWKS_URL: http://auth:3000/api/auth/jwks # Settings is shared with the API
       JWT_ISSUER: https://ephoros.localhost
+    # the image's HTTP healthcheck is for the API process; `disable: true` breaks `up --wait` on older Compose
+    # shortcut: healthy = process alive, upgrade to a heartbeat check when the worker gets one (M4+)
     healthcheck:
-      disable: true # the image's HTTP healthcheck is for the API process
+      test: ['CMD', 'python', '-c', 'import os; os.kill(1, 0)']
+      interval: 10s
+      timeout: 3s
+      retries: 3
     restart: unless-stopped
     depends_on:
       postgres: { condition: service_healthy }
