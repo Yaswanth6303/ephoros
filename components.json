@@ -1,5 +1,5 @@
 {
-  "componentsPath": "libs/web/ui",
+  "componentsPath": "libs/web/shared/ui",
   "buildable": false,
   "generateAs": "entrypoint",
   "style": "vega",

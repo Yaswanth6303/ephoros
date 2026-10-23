@@ -1,0 +1,13 @@
+{
+  "name": "web-auth-domain",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/web/auth/domain/src",
+  "prefix": "eph",
+  "projectType": "library",
+  "tags": ["type:domain", "scope:web-auth"],
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}

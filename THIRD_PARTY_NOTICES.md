@@ -5,10 +5,10 @@
 Motion designs for the components below are ported to Angular from
 [interior](https://github.com/ddoemonn/interior) (React), under the MIT License.
 
-| Ephoros file                                     | interior component |
-| ------------------------------------------------ | ------------------ |
-| `libs/web/ui/src/interactions/loading-button.ts` | Loading Button     |
-| `libs/web/ui/src/interactions/inline-error.ts`   | Inline Validation  |
+| Ephoros file                                            | interior component |
+| ------------------------------------------------------- | ------------------ |
+| `libs/web/shared/ui/src/interactions/loading-button.ts` | Loading Button     |
+| `libs/web/shared/ui/src/interactions/inline-error.ts`   | Inline Validation  |
 
 ```
 MIT License

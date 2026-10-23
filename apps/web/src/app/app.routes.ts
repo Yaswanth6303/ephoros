@@ -1,11 +1,11 @@
 import type { Route } from '@angular/router';
-import { authGuard } from '@ephoros/web/core/auth';
+import { authGuard } from '@ephoros/web/auth/data-access';
 
 export const appRoutes: Route[] = [
   {
     path: 'login',
     loadComponent: () =>
-      import('@ephoros/web/feature-login').then((m) => m.Login),
+      import('@ephoros/web/auth/feature-login').then((m) => m.Login),
   },
   {
     path: '',

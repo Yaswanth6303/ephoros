@@ -134,10 +134,14 @@ libs/
     simulator/       labelled scenario generator and replayer
   shared/
     api-contract/    TypeScript client generated from OpenAPI
-  web/
-    core/            auth store, guards, interceptor
-    feature-login/   login page
-    ui/              Spartan/ui components and interactions
+  web/               one folder per domain, plus shared/ for what several libraries use
+    auth/
+      domain/          user model and role rules (no Angular, no HTTP)
+      data-access/     auth store, guards, interceptor
+      feature-login/   login page
+    shared/
+      ui/              Spartan/ui components and interactions
+      util/            small framework-free helpers
 infra/            Traefik config and local certificates
 docs/             design spec and milestone plans
 ```

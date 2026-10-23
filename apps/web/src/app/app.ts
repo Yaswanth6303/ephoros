@@ -1,7 +1,7 @@
 import { Component, inject, resource } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { me } from '@ephoros/api-contract';
-import { AuthStore } from '@ephoros/web/core/auth';
+import { AuthStore } from '@ephoros/web/auth/data-access';
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 

@@ -21,11 +21,13 @@ export default [
           allow: ['^.*/eslint(\\.base)?\\.config\\.[cm]?[jt]s$'],
           // spec §4.3
           depConstraints: [
+            // layers: app → feature → data-access → domain → util; ui sits beside data-access
             {
               sourceTag: 'type:app',
               onlyDependOnLibsWithTags: [
                 'type:feature',
                 'type:data-access',
+                'type:domain',
                 'type:ui',
                 'type:util',
                 'type:contract',
@@ -35,25 +37,43 @@ export default [
               sourceTag: 'type:feature',
               onlyDependOnLibsWithTags: [
                 'type:data-access',
+                'type:domain',
                 'type:ui',
                 'type:util',
               ],
             },
             {
               sourceTag: 'type:data-access',
-              onlyDependOnLibsWithTags: ['type:contract', 'type:util'],
+              onlyDependOnLibsWithTags: [
+                'type:contract',
+                'type:domain',
+                'type:util',
+              ],
             },
             // a domain's ui may build on shared ui primitives
             {
               sourceTag: 'type:ui',
-              onlyDependOnLibsWithTags: ['type:ui', 'type:util'],
+              onlyDependOnLibsWithTags: ['type:ui', 'type:domain', 'type:util'],
             },
+            {
+              sourceTag: 'type:domain',
+              onlyDependOnLibsWithTags: ['type:util'],
+            },
+            { sourceTag: 'type:util', onlyDependOnLibsWithTags: ['type:util'] },
             { sourceTag: 'type:contract', onlyDependOnLibsWithTags: [] },
-            // each web domain gets scope:<domain> and may import only itself and scope:shared;
+            // scopes: each web domain (scope:web-<domain>) imports only itself and scope:shared;
             // shared holds what several libraries use and never imports a domain, so no cycles
             {
               sourceTag: 'scope:web',
-              onlyDependOnLibsWithTags: ['scope:web', 'scope:shared'],
+              onlyDependOnLibsWithTags: [
+                'scope:web',
+                'scope:web-auth',
+                'scope:shared',
+              ],
+            },
+            {
+              sourceTag: 'scope:web-auth',
+              onlyDependOnLibsWithTags: ['scope:web-auth', 'scope:shared'],
             },
             {
               sourceTag: 'scope:shared',

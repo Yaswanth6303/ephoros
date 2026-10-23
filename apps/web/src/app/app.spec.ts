@@ -7,7 +7,7 @@ import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { client, provideHeyApiClient } from '@ephoros/api-contract';
-import { AuthStore } from '@ephoros/web/core/auth';
+import { AuthStore } from '@ephoros/web/auth/data-access';
 import { App } from './app';
 
 describe('App', () => {

@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { client, provideHeyApiClient } from '@ephoros/api-contract';
-import { authInterceptor } from '@ephoros/web/core/auth';
+import { authInterceptor } from '@ephoros/web/auth/data-access';
 import { appRoutes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
