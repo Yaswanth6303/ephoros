@@ -55,11 +55,17 @@ export default [
               sourceTag: 'type:ui',
               onlyDependOnLibsWithTags: ['type:ui', 'type:domain', 'type:util'],
             },
+            // domain and util stay framework-free so they can be reused anywhere
             {
               sourceTag: 'type:domain',
               onlyDependOnLibsWithTags: ['type:util'],
+              bannedExternalImports: ['@angular/*', 'better-auth*'],
             },
-            { sourceTag: 'type:util', onlyDependOnLibsWithTags: ['type:util'] },
+            {
+              sourceTag: 'type:util',
+              onlyDependOnLibsWithTags: ['type:util'],
+              bannedExternalImports: ['@angular/*', 'better-auth*'],
+            },
             { sourceTag: 'type:contract', onlyDependOnLibsWithTags: [] },
             // scopes: each web domain (scope:web-<domain>) imports only itself and scope:shared;
             // shared holds what several libraries use and never imports a domain, so no cycles
