@@ -4,7 +4,9 @@ RUN npm install -g pnpm@12.14.0
 WORKDIR /app
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 # shortcut: prod install pulls the whole root dependency set, split with `pnpm deploy` if image size matters
-RUN pnpm install --frozen-lockfile --prod && npm uninstall -g pnpm
+# npm is only needed to install pnpm; removing it drops its bundled packages (and their CVEs) from the runtime image
+RUN pnpm install --frozen-lockfile --prod && npm uninstall -g pnpm \
+  && rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
 COPY apps/auth/package.json apps/auth/package.json
 COPY apps/auth/src apps/auth/src
 ENV NODE_ENV=production PORT=3000
