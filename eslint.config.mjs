@@ -43,8 +43,14 @@ export default [
               sourceTag: 'type:data-access',
               onlyDependOnLibsWithTags: ['type:contract', 'type:util'],
             },
-            { sourceTag: 'type:ui', onlyDependOnLibsWithTags: ['type:util'] },
+            // a domain's ui may build on shared ui primitives
+            {
+              sourceTag: 'type:ui',
+              onlyDependOnLibsWithTags: ['type:ui', 'type:util'],
+            },
             { sourceTag: 'type:contract', onlyDependOnLibsWithTags: [] },
+            // each web domain gets scope:<domain> and may import only itself and scope:shared;
+            // shared holds what several libraries use and never imports a domain, so no cycles
             {
               sourceTag: 'scope:web',
               onlyDependOnLibsWithTags: ['scope:web', 'scope:shared'],
