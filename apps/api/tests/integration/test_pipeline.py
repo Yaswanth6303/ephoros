@@ -47,5 +47,6 @@ async def test_simulated_run_lands_in_postgres(
     assert await scalar(engine, "select count(*) from core.events") == len(records)
     assert await redis.xlen(DLQ_STREAM) == 0
     assert (await redis.xpending(RAW_STREAM, GROUP))["pending"] == 0
+    assert await redis.xlen(RAW_STREAM) == 0  # processed entries are deleted, replays don't grow it
     joined = "select count(*) from core.events join core.event_labels using (event_id)"
     assert await scalar(engine, joined) == len(records)

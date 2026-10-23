@@ -49,8 +49,14 @@ class RedisEventBus:
         return [StreamMessage(id, fields) for id, fields in entries]
 
     async def ack(self, ids: Sequence[str]) -> None:
+        """Acks and deletes: callers ack only after storing, so the stream keeps just the backlog.
+        A publish-side MAXLEN would instead drop entries the worker has not read yet."""
+        # shortcut: delete-on-ack assumes one consumer group, use XACKDEL (Redis 8.2+) for more
         if ids:
-            await self.client.xack(RAW_STREAM, GROUP, *ids)
+            async with self.client.pipeline(transaction=True) as pipe:
+                pipe.xack(RAW_STREAM, GROUP, *ids)
+                pipe.xdel(RAW_STREAM, *ids)
+                await pipe.execute()
 
     async def dead_letter(self, fields: dict[str, str]) -> None:
         await self.client.xadd(DLQ_STREAM, fields)  # type: ignore[arg-type]
