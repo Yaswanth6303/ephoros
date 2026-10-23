@@ -10,16 +10,7 @@ let nextId = 0;
 @Component({
   selector: 'eph-inline-error',
   host: { 'aria-live': 'polite', class: 'block', '[id]': '_id' },
-  template: `
-    @if (message(); as text) {
-      <p
-        animate.enter="motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-1 duration-200"
-        class="text-destructive mt-1 text-sm"
-      >
-        {{ text }}
-      </p>
-    }
-  `,
+  templateUrl: './inline-error.html',
 })
 export class InlineError {
   readonly message = input<string | null>(null);

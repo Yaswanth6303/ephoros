@@ -1,0 +1,15 @@
+@if (store.status() === 'authenticated') {
+  <header class="flex items-center justify-between border-b px-6 py-3">
+    <span class="font-semibold">Ephoros</span>
+    <div class="flex items-center gap-3 text-sm">
+      @if (principal.hasValue()) {
+        <span>{{ principal.value().email }}</span>
+        <span hlmBadge variant="secondary">{{ principal.value().role }}</span>
+      }
+      <button hlmBtn variant="outline" size="sm" (click)="signOut()">
+        Sign out
+      </button>
+    </div>
+  </header>
+}
+<main class="p-6"><router-outlet /></main>

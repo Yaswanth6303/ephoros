@@ -36,56 +36,7 @@ export function safeReturnUrl(raw: string | null): string {
     HlmFieldImports,
     HlmInputImports,
   ],
-  template: `
-    <div class="flex min-h-[70vh] items-center justify-center">
-      <section hlmCard class="w-full max-w-sm">
-        <div hlmCardHeader>
-          <h1 hlmCardTitle>Sign in to Ephoros</h1>
-          <p hlmCardDescription>Analyst and admin accounts only.</p>
-        </div>
-        <form
-          hlmCardContent
-          class="grid gap-4"
-          novalidate
-          (submit)="onSubmit($event)"
-        >
-          <div hlmField>
-            <label hlmFieldLabel for="email">Email</label>
-            <input
-              hlmInput
-              id="email"
-              type="email"
-              autocomplete="username"
-              [formField]="loginForm.email"
-            />
-            <eph-inline-error [message]="errorOf(loginForm.email)" />
-          </div>
-          <div hlmField>
-            <label hlmFieldLabel for="password">Password</label>
-            <input
-              hlmInput
-              id="password"
-              type="password"
-              autocomplete="current-password"
-              [formField]="loginForm.password"
-            />
-            <eph-inline-error [message]="errorOf(loginForm.password)" />
-          </div>
-          @if (failure(); as text) {
-            <p role="alert" class="text-destructive text-sm">{{ text }}</p>
-          }
-          <button
-            hlmBtn
-            ephLoadingButton
-            type="submit"
-            [loading]="loginForm().submitting()"
-          >
-            Sign in
-          </button>
-        </form>
-      </section>
-    </div>
-  `,
+  templateUrl: './login.html',
 })
 export class Login {
   private readonly store = inject(AuthStore);
