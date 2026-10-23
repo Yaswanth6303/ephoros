@@ -4,6 +4,7 @@
   "projectType": "application",
   "sourceRoot": "libs/py/simulator/src",
   "tags": ["type:app", "scope:py"],
+  "implicitDependencies": ["detection-core"],
   "namedInputs": {
     "python": [
       "{projectRoot}/**/*",
@@ -15,7 +16,7 @@
     "test": {
       "executor": "nx:run-commands",
       "cache": true,
-      "inputs": ["python"],
+      "inputs": ["python", "^python"],
       "options": {
         "command": "uv run pytest libs/py/simulator -q"
       }
@@ -23,7 +24,7 @@
     "lint": {
       "executor": "nx:run-commands",
       "cache": true,
-      "inputs": ["python", "{workspaceRoot}/.importlinter"],
+      "inputs": ["python", "^python", "{workspaceRoot}/.importlinter"],
       "options": {
         "command": "uv run ruff check libs/py/simulator && uv run ruff format --check libs/py/simulator && uv run lint-imports"
       }
@@ -31,7 +32,7 @@
     "typecheck": {
       "executor": "nx:run-commands",
       "cache": true,
-      "inputs": ["python"],
+      "inputs": ["python", "^python"],
       "options": {
         "command": "uv run mypy"
       }
