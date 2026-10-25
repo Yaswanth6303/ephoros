@@ -10,6 +10,10 @@ COPY libs libs
 RUN NX_DAEMON=false NX_NO_CLOUD=true pnpm nx build web
 
 FROM nginxinc/nginx-unprivileged:stable-alpine
+# apply Alpine security fixes released after the base image was built, then drop back to its nginx user
+USER root
+RUN apk upgrade --no-cache
+USER 101
 COPY apps/web/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist/apps/web/browser /usr/share/nginx/html
 EXPOSE 8080
