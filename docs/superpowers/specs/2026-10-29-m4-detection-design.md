@@ -318,34 +318,31 @@ It depends on the simulator, asyncpg and testcontainers, all pinned exactly (bui
 --seed 1` runs a dev seed. CI runs the held-out seed. Tuning decisions are made from dev-seed
 reports only; the held-out result is reported, not tuned against.
 
-**Matching rules (decided: the strict option).**
+**Unit of measurement and matching (decided: strict definitions).**
 
-- **Matching.** Each raised incident is matched to the scenario instance (for example
-  `crypto_mining-004`) that contributes the most of its labelled events. Ties go to the lower
-  instance id, so the result is deterministic.
-- **True positives.** A malicious instance is **caught** when at least one raised incident is
-  matched to it. Each malicious instance gives **at most one** true positive: the earliest matched
-  raised incident, by `first_seen` then `incident_id`.
-- **False positives.** Every other raised incident is a false positive:
-  - extra alerts for an instance that is already caught
-  - incidents matched to a benign instance, including look-alikes
-- **Precision and recall.**
-  - precision = true positives ÷ raised incidents
-  - recall = caught malicious instances ÷ malicious instances
+- Each raised incident is **matched** to the scenario instance (for example `crypto_mining-004`)
+  that contributes the most of the incident's labelled events. Ties go to the instance with the
+  earliest event.
+- **One attack, one catch.** A malicious instance is **caught** when at least one raised incident
+  is matched to it. Only the earliest such incident is a true positive. Every other raised
+  incident matched to the same instance is a **duplicate**, and counts as a false positive.
+- **False positives** are raised incidents matched to a benign instance (look-alikes, routine,
+  legit bursts) plus duplicates.
+- Precision = TP ÷ raised incidents. Recall = caught malicious instances ÷ malicious instances.
 
 **Metrics:**
 
-| Metric (§1.3)                                                           | M4 status                           | How                                                                                                                                                                                                                                                                                                          |
-| ----------------------------------------------------------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Ephemeral asset visibility (recall of the ephemeral class)              | measured                            | assets table class vs. `asset_class` truth (per asset, majority of its labelled events)                                                                                                                                                                                                                      |
-| Detection latency p95 (alert pushed to UI)                              | **not yet measured** (needs M5 SSE) | Report shows worker processing time (`detected_at − ingested_at`) as information only, not against the target.                                                                                                                                                                                               |
-| Noise reduction = 1 − incidents ÷ raw detections                        | measured                            | Judged on **raised** incidents, the queue an analyst sees (decided). The report also shows the figure for all incidents, below-threshold ones included, as information.                                                                                                                                      |
-| Legit-burst suppression = share of legit bursts with no raised incident | measured                            | Only instances labelled `legit_burst` count (decided). A burst is **not suppressed** if any raised incident contains even one of its events (decided). The metric is defined by outcome, so it is measurable now; the L2 suppression mechanism is still M6. Look-alike false positives show up in precision. |
-| Incident correlation (mean cluster purity)                              | measured                            | share of each raised incident's events from its matched instance                                                                                                                                                                                                                                             |
-| Risk scoring vs. analyst judgment (Spearman ρ)                          | measured                            | incident `risk_score` vs. matched instance's labelled severity, across all incidents                                                                                                                                                                                                                         |
-| Malicious precision / recall                                            | measured                            | precision over raised incidents; recall over malicious instances                                                                                                                                                                                                                                             |
-| Narrative citation validity                                             | **not yet measured** (M7)           |                                                                                                                                                                                                                                                                                                              |
-| MITRE match on 3 reference incidents                                    | measured (builder's call)           | One reference instance each of mining (T1496), exposure (T1190) and identity misuse (T1078); the expected techniques live in the evaluation config, not in the simulator labels.                                                                                                                             |
+| Metric (§1.3)                                                           | M4 status                           | How                                                                                                                                                                                                                                                                                             |
+| ----------------------------------------------------------------------- | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ephemeral asset visibility (recall of the ephemeral class)              | measured                            | assets table class vs. `asset_class` truth (per asset, majority of its labelled events)                                                                                                                                                                                                         |
+| Detection latency p95 (alert pushed to UI)                              | **not yet measured** (needs M5 SSE) | Report shows worker processing time (`detected_at − ingested_at`) as information only, not against the target.                                                                                                                                                                                  |
+| Noise reduction = 1 − incidents ÷ raw detections                        | measured                            | Judged against the target on **raised** incidents (the queue an analyst sees). The all-incident figure is also reported, as information (decided).                                                                                                                                              |
+| Legit-burst suppression = share of legit bursts with no raised incident | measured                            | Covers only `legit_burst` instances. A burst is **unsuppressed** if any raised incident contains even one of its events (decided). Benign look-alikes still count through false positives. The metric is defined by outcome, so it is measurable now. The L2 suppression mechanism is still M6. |
+| Incident correlation (mean cluster purity)                              | measured                            | share of each raised incident's events from its matched instance                                                                                                                                                                                                                                |
+| Risk scoring vs. analyst judgment (Spearman ρ)                          | measured                            | incident `risk_score` vs. matched instance's labelled severity, across all incidents                                                                                                                                                                                                            |
+| Malicious precision / recall                                            | measured                            | precision over raised incidents; recall over malicious instances                                                                                                                                                                                                                                |
+| Narrative citation validity                                             | **not yet measured** (M7)           |                                                                                                                                                                                                                                                                                                 |
+| MITRE match on 3 reference incidents                                    | measured (builder's call)           | One reference instance each of mining (T1496), exposure (T1190) and identity misuse (T1078); the expected techniques live in the evaluation config, not in the simulator labels.                                                                                                                |
 
 **Report content.** The report also has:
 
@@ -376,36 +373,48 @@ twice to check this.
 **Edge cases.** A metric with no data counts as a **fail** in the report, never as a pass. Examples:
 precision with zero raised incidents, or Spearman with fewer than three incidents.
 
-**Exit codes.**
+**Exit codes and CI (decided).**
 
-| Exit code | Meaning                                                                                                    |
-| --------- | ---------------------------------------------------------------------------------------------------------- |
-| 0         | Every measured metric passes                                                                               |
-| 1         | At least one measured metric fails (the report names it)                                                   |
-| 2         | The run itself broke: pipeline error, drain timeout, a crash. CI must never treat this as a missed target. |
+`ephoros-eval` separates two kinds of failure.
 
-_Not yet measured_ never causes a failure.
+| Exit code | Meaning                                                                          |
+| --------- | -------------------------------------------------------------------------------- |
+| **0**     | The evaluation ran and every measured metric passes                              |
+| **1**     | The evaluation ran but a measured metric misses its target (the report names it) |
+| **2**     | **The evaluation could not run properly**, so its numbers can't be trusted       |
 
-**CI (decided: report-only during M4):**
+Exit 2 covers:
 
-- **The job.** It runs `just evaluate` on the held-out seed, uploads the report as an artifact,
-  and writes the pass / fail / not-yet-measured table to the job summary.
-- **Exit codes.** The workflow handles the exit code explicitly:
-  - **0:** the job passes
-  - **1:** a missed target. The job passes, the summary shows the failing metrics clearly and
-    adds a warning annotation, and nothing is hidden.
-  - **2 or anything else:** the job fails. A broken evaluation is not a missed target.
-- **Becoming blocking.** Once every measured target passes, the job becomes blocking, so exit 1
-  fails it and guards against regressions. That switch is a one-line change: a commit that
-  removes the exit-1 allowance.
-- **Owner pushes CI changes.** The owner edits and pushes CI workflows, so each CI change is
-  given to the owner as a diff to apply.
-- **Thresholds are fixed.** No threshold is changed to get a passing report. Targets live in one
-  file, and changing one needs an ADR approved by the owner.
+- containers fail to start
+- migrations fail
+- the worker dies
+- the stream doesn't drain before the timeout
+- events are dead-lettered unexpectedly
+- `rule_errors > 0`
+- the warm-up or labelled run is missing
 
-**Definition of done for M4** (decided): every measured target passes, **or** each target still
-missed after honest tuning on dev seeds is documented in an ADR that the owner approves.
-Tuning happens only on dev seeds; the held-out seed is never tuned against.
+_Not yet measured_ never causes a non-zero exit.
+
+**CI modes:**
+
+| Mode            | When                              | Exit 2 (infrastructure error) | Exit 1 (missed target)                             |
+| --------------- | --------------------------------- | ----------------------------- | -------------------------------------------------- |
+| **Report-only** | During M4                         | Fails the job                 | Doesn't fail the job: `--report-only` maps it to 0 |
+| **Blocking**    | Once every measured target passes | Fails the job                 | Fails the job, so it guards against regressions    |
+
+Switching to blocking is a one-line change: drop `--report-only`.
+
+In both modes, the job runs `just evaluate` on the held-out seed, uploads the report as an
+artifact, and writes the pass / fail / not-yet-measured table to the job summary. The owner edits
+CI workflows and pushes them, so the CI change is proposed as a diff for the owner to apply.
+
+**M4 is done when (decided):**
+
+- every measured target passes, **or**
+- each remaining miss has been investigated, tuned on dev seeds, reported honestly, and
+  documented in an ADR the owner approves.
+
+A target is never weakened without an approved ADR.
 
 **When a target is missed** (decided):
 
@@ -416,6 +425,14 @@ Tuning happens only on dev seeds; the held-out seed is never tuned against.
 5. If the target is still missed, report it honestly. Never weaken a target or edit the dataset.
    Recalibrating a target, which the main spec §1.3 allows, needs an ADR with the reason and the
    owner's approval.
+
+**Tests for the definitions.** The strict matching rules get pure-function tests on hand-built
+cases:
+
+- a duplicate alert counts as a false positive
+- a tie goes to the instance with the earliest event
+- one event inside a raised incident marks its burst unsuppressed
+- zero raised incidents is a fail
 
 ### 6.10 Incident API
 
