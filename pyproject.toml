@@ -18,7 +18,7 @@ target-version = "py313"
 extend-exclude = ["docs"]
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "B", "UP", "ASYNC"]
+select = ["E", "F", "I", "B", "UP", "ASYNC", "FAST"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["ephoros_api", "ephoros_detection", "ephoros_sim"]

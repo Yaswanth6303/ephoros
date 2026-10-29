@@ -28,6 +28,9 @@ def get_jwk_client(request: Request) -> jwt.PyJWKClient:
     return client
 
 
+JWKClientDep = Annotated[jwt.PyJWKClient, Depends(get_jwk_client)]
+
+
 def _unauthorized() -> HTTPException:
     return HTTPException(401, "Invalid or missing token", headers={"WWW-Authenticate": "Bearer"})
 
@@ -36,7 +39,7 @@ def _unauthorized() -> HTTPException:
 def current_user(
     request: Request,
     credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(_bearer)],
-    jwk_client: Annotated[jwt.PyJWKClient, Depends(get_jwk_client)],
+    jwk_client: JWKClientDep,
 ) -> Principal:
     if credentials is None:
         raise _unauthorized()
@@ -56,8 +59,11 @@ def current_user(
         raise _unauthorized() from exc
 
 
+CurrentUserDep = Annotated[Principal, Depends(current_user)]
+
+
 def require_role(role: Role) -> Callable[..., Principal]:
-    def check(user: Annotated[Principal, Depends(current_user)]) -> Principal:
+    def check(user: CurrentUserDep) -> Principal:
         if user.role != role:
             raise HTTPException(403, f"Requires role {role}")
         return user

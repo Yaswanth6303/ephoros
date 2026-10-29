@@ -7,11 +7,11 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import AwareDatetime, BaseModel
 
-from ephoros_api.api.auth import Principal, current_user
+from ephoros_api.api.auth import current_user
 from ephoros_api.domain.ports import EventStore
 from ephoros_detection.events import Actor, Category, Event, Outcome, Resource, Source
 
-router = APIRouter(prefix="/api/v1", tags=["events"])
+router = APIRouter(prefix="/api/v1", tags=["events"], dependencies=[Depends(current_user)])
 
 
 class EventOut(BaseModel):
@@ -39,6 +39,9 @@ def get_event_store(request: Request) -> EventStore:
     return store
 
 
+EventStoreDep = Annotated[EventStore, Depends(get_event_store)]
+
+
 def _encode(event: Event) -> str:
     key = f"{event.observed_at.isoformat()}|{event.event_id}"
     return base64.urlsafe_b64encode(key.encode()).decode()
@@ -57,8 +60,7 @@ def _decode(cursor: str) -> tuple[datetime, UUID]:
 
 @router.get("/events")
 async def list_events(
-    _user: Annotated[Principal, Depends(current_user)],
-    store: Annotated[EventStore, Depends(get_event_store)],
+    store: EventStoreDep,
     limit: Annotated[int, Query(ge=1, le=200)] = 50,
     cursor: str | None = None,
 ) -> EventPage:

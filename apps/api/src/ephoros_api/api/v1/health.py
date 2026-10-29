@@ -33,6 +33,10 @@ def get_checks(request: Request) -> dict[str, Check]:
     return checks
 
 
+SettingsDep = Annotated[Settings, Depends(get_settings)]
+ChecksDep = Annotated[dict[str, Check], Depends(get_checks)]
+
+
 @router.get("/healthz")
 async def healthz() -> Health:
     return Health(status="ok")
@@ -44,8 +48,8 @@ async def healthz() -> Health:
     responses={503: {"model": Problem, "content": {"application/problem+json": {}}}},
 )
 async def readyz(
-    checks: Annotated[dict[str, Check], Depends(get_checks)],
-    settings: Annotated[Settings, Depends(get_settings)],
+    checks: ChecksDep,
+    settings: SettingsDep,
 ) -> Readiness | JSONResponse:
     results = await asyncio.gather(
         *(asyncio.wait_for(check(), settings.readiness_timeout_s) for check in checks.values()),

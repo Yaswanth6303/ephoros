@@ -1,12 +1,10 @@
-from typing import Annotated
+from fastapi import APIRouter
 
-from fastapi import APIRouter, Depends
-
-from ephoros_api.api.auth import Principal, current_user
+from ephoros_api.api.auth import CurrentUserDep, Principal
 
 router = APIRouter(prefix="/api/v1", tags=["auth"])
 
 
 @router.get("/me")
-def me(user: Annotated[Principal, Depends(current_user)]) -> Principal:
+def me(user: CurrentUserDep) -> Principal:
     return user

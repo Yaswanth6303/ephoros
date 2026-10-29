@@ -49,6 +49,25 @@ async def test_me_returns_the_principal(client: AsyncClient) -> None:
     }
 
 
+PUBLIC_PATHS = {"/api/v1/healthz", "/api/v1/readyz"}  # probes and healthchecks call these
+
+
+@pytest.mark.anyio
+async def test_every_api_route_except_probes_requires_a_token(
+    app: FastAPI, client: AsyncClient
+) -> None:
+    # the OpenAPI document lists every operation (FastAPI 0.150 nests included routers privately)
+    operations = [
+        (method, path)
+        for path, ops in app.openapi()["paths"].items()
+        if path not in PUBLIC_PATHS
+        for method in ops
+    ]
+    assert operations
+    for method, path in operations:
+        assert (await client.request(method, path)).status_code == 401, (method, path)
+
+
 @pytest.mark.anyio
 async def test_missing_token_is_401_with_challenge(client: AsyncClient) -> None:
     r = await client.get("/api/v1/me")
