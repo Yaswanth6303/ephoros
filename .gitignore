@@ -22,8 +22,7 @@ __pycache__/
 .claude-flow/
 .swarm/
 ruvector.db
-agentdb.rvf
-agentdb.rvf.lock
+agentdb.rvf*
 .DS_Store
 /.nx/migrate-runs
 .claude
